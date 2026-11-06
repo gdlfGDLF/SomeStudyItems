@@ -1,0 +1,600 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CAN 全链路实验室 · Linux → FPGA → ACK → TxDone</title><style>:root{--bg:#f3f5f8;--ink:#1b2c40;--muted:#64778b;--line:#dce4ed;--blue:#3766b0;--green:#087d73;--amber:#b47718;--red:#b7434c;--soft:#eaf1fa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'Segoe UI','Microsoft YaHei',sans-serif}button,input,select{font:inherit}button{cursor:pointer;padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--ink)}button:hover{background:var(--soft)}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8ba8d7;outline-offset:2px}.primary{background:var(--blue);border-color:var(--blue);color:white}.primary:hover{background:#285394}input,select{width:100%;min-width:0;padding:8px;border:1px solid #cfd9e6;border-radius:5px;color:var(--ink);background:white}h1,h2,h3,p{margin:0}h1{font-size:29px;letter-spacing:-.7px;font-weight:650;margin:5px 0}h2{font-size:15px;font-weight:650}h3{font-size:14px;font-weight:600}code{font-family:Consolas,'Microsoft YaHei',monospace}header{height:70px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:0 30px}.brand{margin-right:auto;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px;font-weight:600}.brand>span{width:33px;height:33px;border-radius:9px;background:var(--ink);color:#a7d2ff;text-align:center;font:26px/33px sans-serif}.brand small{font:10px Consolas;letter-spacing:1.5px;margin-left:8px;color:var(--muted)}.mode{font-size:11px;color:var(--green)}header button{font-size:12px}main{max-width:1640px;padding:26px 30px;margin:auto}.intro{display:flex;justify-content:space-between;gap:30px;align-items:center;margin-bottom:22px}.eyebrow{font-size:10px;letter-spacing:1px;color:var(--blue)}.intro p:not(.eyebrow){font-size:12px;color:var(--muted)}.intro-note{display:flex;align-items:center;gap:16px}.intro-note b{font:20px Consolas;color:var(--blue)}.intro-note span{font-size:11px;color:var(--muted)}.panel{padding:20px;background:white;border:1px solid var(--line);border-radius:11px;min-width:0}.config{margin-bottom:20px;padding:17px 20px}.config form{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.config label{flex:1 1 90px;font-size:11px;color:var(--muted);min-width:0}.config label input,.config label select{display:block;margin-top:5px;font-size:13px}.config .payload-field{flex:2 1 150px}.config .scenario-field{flex:2 1 240px}.config button{align-self:end;margin-bottom:0}.muted{color:var(--muted);font-size:11px}#config-note{margin-top:10px}#validation{color:var(--red);padding-top:10px;font-size:12px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:20px;align-items:start}.main-column,.side-column{display:flex;flex-direction:column;gap:18px;min-width:0}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;flex-wrap:wrap}.architecture{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}.domain{min-width:0;position:relative;z-index:1}.domain h3{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:5px}.domain h3 span{order:2;font:9px Consolas;color:var(--muted);letter-spacing:1px}.domain-sub{height:39px;font-size:10px;color:var(--muted);line-height:1.5}.node{width:100%;display:flex;gap:9px;text-align:left;align-items:center;padding:10px 8px;margin-bottom:9px;position:relative;min-height:64px;background:#f8fafc;border-color:transparent;transition:background .18s,border-color .18s,box-shadow .18s}.node i{font:10px Consolas;color:#8494a5;font-style:normal}.node b{display:block;font-weight:550;font-size:12px}.node small{display:block;font-size:10px;color:var(--muted);overflow-wrap:anywhere}.node em{font-size:9px;font-style:normal;margin-left:auto;color:var(--muted)}.node.active{background:#e6f0ff;border-color:#95b6e6;box-shadow:0 0 0 3px #edf3fd}.node.visited:not(.active){background:#eff6f4}.kernel-area{border:1px dashed #ccd8e7;border-radius:8px;padding:17px 6px 0;margin-top:3px;position:relative}.kernel-area .node{min-height:58px}.boundary{position:absolute;top:-7px;left:10px;background:white;font-size:9px;letter-spacing:1px;color:var(--blue);padding:0 5px}.fpga .node,.peer .node{margin-bottom:15px;min-height:67px}#topology{position:relative}#connections{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2}.bus-band{position:relative;z-index:1;display:flex;align-items:center;gap:9px;padding:16px 0 6px;color:var(--muted);font:11px Consolas,'Microsoft YaHei',sans-serif}.physical-line{height:2px;flex:1;background:var(--green)}.physical-line.l{background:var(--blue)}.bus-band b{font-size:11px;font-weight:400;text-align:center;max-width:50%}.bus-band.active b{color:var(--green);font-weight:600}.return-label{margin:18px 0 9px;font-size:11px;font-weight:600}.return-label span{font-size:10px;font-weight:400;color:var(--muted);margin-left:10px}.return-path{display:flex;align-items:center;gap:8px;position:relative;z-index:1}.return-path>.node{margin:0;min-height:62px;padding:8px;flex:1;min-width:0}.return-path>span{color:#9aabba}.return-path .node b{font-size:11px}.return-path .node small{font-size:9px}.live-status{margin-top:18px;border-top:1px solid var(--line);padding-top:13px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.live-status span{display:block;color:var(--muted);font-size:10px}.live-status b{display:block;font-size:12px;font-weight:550;margin-top:2px}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.controls{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.controls button{font-size:12px}.controls select{width:65px;padding:7px 5px;font-size:12px}.scrubber{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--muted)}.scrubber span{min-width:54px}.scrubber input{flex:1;accent-color:var(--blue);padding:0}.scrubber button{font-size:11px;padding:4px 8px}.jump-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}.jump-buttons button{font-size:10px;padding:5px 8px;background:#f7f9fc}#event-detail{background:#f2f6fc;border-left:3px solid var(--blue);padding:13px 15px;min-height:125px}#event-detail h3{font-size:15px;margin-bottom:5px}#event-detail p{font-size:12px;line-height:1.7;color:#475c75}#event-detail code{display:block;font-size:10px;color:var(--muted);overflow-wrap:anywhere;margin-top:8px}.tag{display:inline-block;font-size:9px;letter-spacing:.3px;border-radius:4px;padding:3px 6px;background:#eff3f8;color:var(--muted)}.evidence{float:right;margin-left:7px}.signal-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;color:var(--ink)}.green{color:var(--green)}.blue{color:var(--blue)}.amber{color:var(--amber)}#wave{display:block;width:100%;height:225px}.bit-info{font-size:11px;color:var(--muted);min-height:20px}.bit-list{display:flex;gap:3px;margin:8px 0 16px}.bit-list button{flex:1;min-width:0;font:11px Consolas;padding:5px 0}.bit-list button.selected{background:var(--ink);color:white}.bit-list button.stuffed{border-color:#c89644}.bit-list button.future{color:#abb5c2;background:#f8fafc}.decode-chain{display:flex;align-items:center;gap:10px;background:#f7f9fc;border-radius:6px;padding:13px}.decode-chain>div{flex:1;min-width:0}.decode-chain>div:nth-of-type(2){flex:1.8}.decode-chain label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}.decode-chain strong{display:block;font-size:13px;font-weight:550}.decode-chain small{font-size:9px;color:var(--muted)}.decode-chain code{font-size:11px;overflow-wrap:anywhere;display:block}.decode-chain>span{color:#9caec3}.fine-print{font-size:10px;color:var(--muted);margin-top:12px;line-height:1.7}.packet-tabs{display:flex;gap:4px}.packet-tabs button{font-size:11px;padding:5px 9px}.packet-tabs button.active{background:var(--soft);border-color:#9db5d7;color:var(--blue)}#packet-caption{font-size:12px;color:var(--muted);margin-bottom:12px}#packet-fields{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}#packet-fields button{font-size:10px;padding:5px 7px;background:#f3f6fa;border-color:transparent}#packet-fields button.active{border-color:var(--blue);color:var(--blue)}#hex-grid{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:4px}#hex-grid button{padding:6px 0;font:12px Consolas;border-color:transparent;background:#edf2f8;position:relative}#hex-grid button.data{background:#e4f1eb}#hex-grid button.active{box-shadow:inset 0 0 0 1px var(--blue);background:#dce9fb}#hex-grid button small{display:block;color:var(--muted);font-size:8px;margin-bottom:2px}.byte-detail{background:#f7f9fc;font-size:11px;padding:10px;margin-top:10px;min-height:37px}.packet-parse{font-size:11px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}.ring{margin-bottom:17px}.ring>div:first-child{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}.ring b{font:12px Consolas}.ring span{font-size:10px;color:var(--muted)}.ring-track{height:7px;background:#edf1f6;border-radius:5px;overflow:hidden;margin-bottom:5px}.ring-track i{display:block;width:0;height:100%;background:var(--blue);transition:width .15s}.ring:nth-of-type(3) .ring-track i{background:var(--green)}.ring code{font-size:10px;color:var(--muted)}#counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;border-top:1px solid var(--line);padding-top:13px}#counter-grid span{display:block;font-size:10px;color:var(--muted)}#counter-grid b{display:block;font:21px Consolas;margin-top:2px}.events-panel{padding-right:13px}#events{max-height:440px;overflow:auto;scrollbar-width:thin}#events button{border:0;border-radius:5px;display:block;text-align:left;width:100%;font-size:11px;padding:7px 9px;margin-bottom:3px;background:transparent}#events button span{display:inline-block;font:9px Consolas;margin-right:9px;color:#90a0b2}#events button.active{background:#e9f0fa;color:var(--blue)}#events button.past{color:#6b7c90}.knowledge p{font-size:11px;color:var(--muted);margin-top:14px}.knowledge b{color:var(--ink);font-weight:550}.knowledge h2{font-size:13px}footer{color:var(--muted);font-size:11px;text-align:center;padding:25px 0 5px}[hidden]{display:none!important}@media(max-width:1250px){.layout{grid-template-columns:minmax(0,1fr) 245px;gap:15px}.panel{padding:16px}.architecture{gap:15px}.node b{font-size:11px}.node small{font-size:9px}.node{gap:5px}.domain h3{font-size:12px}.domain-sub{font-size:9px}.intro-note{display:none}.return-path{gap:3px}.return-path .node{padding:7px 4px}.domain h3 span{display:none}}@media(max-width:1000px){.layout{grid-template-columns:1fr}.side-column{display:grid;grid-template-columns:1fr 1fr}.knowledge{grid-column:1/-1}.knowledge p{display:inline-block;width:32%;vertical-align:top;padding-right:15px}.architecture{gap:23px}.node b{font-size:12px}.node small{font-size:10px}.domain-sub{height:35px}.events-panel nav{max-height:260px}}@media(max-width:640px){header{padding:0 14px;gap:8px}.brand small,.mode{display:none}.brand{font-size:13px}header button{font-size:10px;padding:6px}main{padding:20px 12px}h1{font-size:24px}.panel{padding:14px}.architecture{grid-template-columns:1fr;gap:18px}.domain-sub{height:auto;margin-bottom:10px}.node{margin-bottom:7px;min-height:55px}.fpga .node,.peer .node{margin-bottom:7px;min-height:55px}.domain h3{font-size:14px}.domain h3 span{display:block}.return-path{display:grid;grid-template-columns:1fr 15px 1fr}.return-path>span:nth-of-type(2){display:none}.return-label span{display:block;margin-left:0}.live-status{grid-template-columns:1fr 1fr}.side-column{display:flex}.knowledge p{display:block;width:auto}.decode-chain{flex-wrap:wrap}.decode-chain>div:nth-of-type(2){flex-basis:60%}.decode-chain>div:nth-of-type(3){flex-basis:100%;border-top:1px solid var(--line);padding-top:8px}.decode-chain>span:nth-of-type(2){display:none}#hex-grid{grid-template-columns:repeat(8,minmax(0,1fr))}.signal-legend{gap:10px}.config form{gap:9px}.config .scenario-field{flex-basis:100%}.scrubber{gap:7px}.bit-list{gap:2px}.bit-list button{font-size:10px}.heading{gap:10px}#event-detail{min-height:160px}}
+</style></head><body>
+<header><a class="brand" href="#"><span>↝</span> CAN 全链路实验室 <small>LAB / 02</small></a><span class="mode">● 离线仿真 · 源码映射</span><button id="export">导出事件记录</button></header>
+<main><section class="intro"><div><p class="eyebrow">从一次 send，到真正的发送完成</p><h1>追踪一帧数据的完整旅程。</h1><p>内核与驱动、DMA 环、FPGA、两根总线，以及返回主机的完成报告。</p></div><div class="intro-note"><b>ACK ≠ TxDone</b><span>一个发生在 CAN 总线上<br>一个由设备报告触发驱动处理</span></div></section>
+<section class="config panel"><form id="config-form"><label>CAN ID / HEX<input id="identifier" value="200" maxlength="5" autocomplete="off"></label><label class="payload-field">数据 / HEX，0–8 字节<input id="payload" value="DC 05" autocomplete="off"></label><label>通道<select id="channel"><option value="0">can0</option><option value="1">can1</option><option value="2">can2</option><option value="3">can3</option></select></label><label>位速率<select id="bitrate"><option value="125000">125 kbit/s</option><option value="250000">250 kbit/s</option><option value="500000" selected>500 kbit/s</option><option value="1000000">1 Mbit/s</option></select></label><label class="scenario-field">实验场景<select id="scenario"><option value="success">正常：ACK → TxDone → 本地 echo</option><option value="noack">总线：无对端，没有 ACK</option><option value="listen">总线：对端只听，不发 ACK</option><option value="filtered">对端：过滤数据，但仍 ACK</option><option value="lost-report">主机：有 ACK，丢失完成报告</option><option value="txerror">设备：注入发送失败报告</option><option value="ringfull">驱动：发送环满，停止队列</option></select></label><label>轮询间隔 / ms<input id="poll" type="number" min="1" max="100" value="1"></label><button class="primary" type="submit">生成 / 重置</button></form><div id="validation" role="alert" hidden></div><div id="config-note" class="muted">以当前驱动的经典 CAN 路径为依据；FPGA 内部行为为教学模型。修改参数后重新生成。</div></section>
+<div class="layout"><section class="main-column">
+<section class="panel path-panel"><div class="heading"><div><span class="eyebrow">01 / 架构与数据方向</span><h2>每一层正在做什么</h2></div><span class="muted">点击节点跳到相应事件</span></div><div id="topology"><svg id="connections" aria-hidden="true"></svg><div class="architecture">
+<div class="domain host"><h3><span>HOST</span> Linux 主机</h3><div class="domain-sub">驱动属于内核，MM2S / S2MM 位于主机 DMA 内存</div><button class="node" data-node="app"><i>01</i><div><b>应用程序</b><small>send / write · can_frame</small></div><em>用户态</em></button><div class="kernel-area"><span class="boundary">LINUX 内核空间</span><button class="node" data-node="kernel"><i>02</i><div><b>SocketCAN / 网络栈</b><small>PF_CAN → skb → netdev</small></div></button><button class="node" data-node="driver"><i>03</i><div><b>TOSUN PCIe 驱动</b><small>encode_tx · echo 队列</small></div></button><button class="node" data-node="mm2s"><i>04</i><div><b>MM2S 发送环</b><small>CPU 写包 → 发布 WR_PTR</small></div></button></div></div>
+<div class="domain fpga"><h3><span>DEVICE</span> PCIe 板卡 / FPGA</h3><div class="domain-sub">设备内部流水线示意，无 RTL 周期级仿真</div><button class="node" data-node="fpga-dma"><i>05</i><div><b>PCIe / DMA 引擎</b><small>从主机读走数据 · 更新 RD</small></div></button><button class="node" data-node="fpga-parser"><i>06</i><div><b>业务包解析</b><small>0xA5 → FDID → ID / DATA</small></div></button><button class="node" data-node="mac"><i>07</i><div><b>CAN 控制器 / MAC</b><small>组帧 · CRC · 填充 · TXD</small></div></button><button class="node" data-node="txphy"><i>08</i><div><b>CAN 收发器</b><small>TXD 逻辑 → H / L 电压</small></div></button></div>
+<div class="domain peer"><h3><span>PEER</span> 对端 CAN 节点</h3><div class="domain-sub">协议正确接收与应用是否接收，分开观察</div><button class="node" data-node="rxphy"><i>09</i><div><b>差分接收器</b><small>H − L → RXD → 位采样</small></div></button><button class="node" data-node="peer-parser"><i>10</i><div><b>去填充 / 字段解析</b><small>位 → ID / DLC / 数据</small></div></button><button class="node" data-node="peer-crc"><i>11</i><div><b>CRC 检查 / ACK</b><small>校验通过 → ACK 槽驱动 0</small></div></button><button class="node" data-node="peer-app"><i>12</i><div><b>接收应用</b><small>通过过滤 → 读取数据</small></div></button></div>
+</div><div class="bus-band" id="bus-band"><span>CAN_H</span><div class="physical-line h"></div><b id="bus-label">总线空闲 · 隐性 1</b><div class="physical-line l"></div><span>CAN_L</span></div><div class="return-label">发送完成返回路径 <span>仅在设备返回相应报告后，驱动才处理完成</span></div><div class="return-path"><button class="node" data-node="report"><div><b>FPGA 发送报告</b><small>status_grp · TX / ERROR</small></div></button><span>→</span><button class="node" data-node="s2mm"><div><b>S2MM 回传环</b><small>FPGA 写入主机内存</small></div></button><span>→</span><button class="node" data-node="poll"><div><b>驱动轮询 / 解码</b><small>delayed_work · decode_rx</small></div></button><span>→</span><button class="node" data-node="echo"><div><b>TxDone / echo</b><small>释放待完成项 · 更新计数</small></div></button></div></div>
+<div class="live-status"><div><span>MM2S 数据已取走</span><b id="status-dma">尚未</b></div><div><span>总线 ACK</span><b id="status-ack">尚未到达</b></div><div><span>对端应用收到</span><b id="status-peer">尚未</b></div><div><span>主机 TxDone</span><b id="status-done">尚未</b></div></div></section>
+<section class="panel player"><div class="heading"><h2>逐事件回放</h2><div class="controls"><button id="reset" aria-label="回到起点">↶</button><button id="previous">上一步</button><button id="play" class="primary">▶ 播放</button><button id="next">下一步</button><select id="speed" aria-label="播放速度"><option value="900">慢速</option><option value="350" selected>中速</option><option value="90">快速</option></select></div></div><div class="scrubber"><span id="position"></span><input id="seek" type="range" min="0" value="0" aria-label="选择流程事件"><button id="finish">到结果</button></div><div class="jump-buttons"><button data-jump="mm2s">DMA 提交</button><button data-jump="bus">CAN 位流</button><button id="jump-ack">ACK 时刻</button><button data-jump="report">设备报告</button><button data-jump="echo">TxDone</button></div><div id="event-detail" aria-live="polite"></div></section>
+<section class="panel signals"><div class="heading"><div><span class="eyebrow">02 / 从电压还原消息</span><h2>H / L → RXD → 采样位 → 字节</h2></div><span id="wire-clock" class="muted"></span></div><div class="signal-legend"><span class="green">━ CAN_H</span><span class="blue">━ CAN_L</span><span>━ 总线 RXD</span><span class="amber">● 采样点</span></div><svg id="wave" role="img" aria-label="CAN_H、CAN_L、总线逻辑及采样波形"></svg><div class="bit-info" id="bit-info"></div><div class="bit-list" id="bits"></div><div class="decode-chain"><div><label>当前采样</label><strong id="sampled">—</strong><small id="sample-detail"></small></div><span>→</span><div><label>去填充后的位</label><code id="raw-bits">等待位流</code></div><span>→</span><div><label>解析中的帧</label><strong id="parsed-id">ID — · DLC —</strong><code id="rx-bytes">DATA —</code></div></div><p class="fine-print">理想高速 CAN 电压示意，采样点为 80%。时间轴仅表示线上位时间；主机执行与 DMA 延迟不按比例。ACK 槽由接收节点驱动，发送节点在该槽释放总线。</p></section>
+<section class="panel packets"><div class="heading"><div><span class="eyebrow">03 / 数据格式在每一层的变化</span><h2>内存里的包，不是线上那一帧</h2></div><div class="packet-tabs"><button id="packet-tx" class="active">MM2S 发送包</button><button id="packet-rx">S2MM 完成报告</button></div></div><div id="packet-caption"></div><div id="packet-fields"></div><div id="hex-grid"></div><p id="byte-detail" class="byte-detail" aria-live="polite">选择字节，查看偏移与所属字段。</p><div id="packet-parse" class="packet-parse"></div></section>
+</section>
+<aside class="side-column"><section class="panel counters"><div class="heading"><h2>主机与设备状态</h2><span class="tag">随步骤更新</span></div><div class="ring"><div><b>MM2S</b><span>主机 → FPGA</span></div><div class="ring-track"><i id="mm2s-fill"></i></div><code id="mm2s-pointers"></code></div><div class="ring"><div><b>S2MM</b><span>FPGA → 主机</span></div><div class="ring-track"><i id="s2mm-fill"></i></div><code id="s2mm-pointers"></code></div><div id="counter-grid"></div><p class="fine-print">环大小 8 MiB。进度条仅放大当前一包的占用；指针显示相对实验起点的字节数。</p></section><section class="panel events-panel"><div class="heading"><h2>事件导航</h2><span class="tag" id="event-count"></span></div><nav id="events" aria-label="流程事件"></nav></section><section class="panel knowledge"><h2>怎么读这张图</h2><p><b>进入内核</b><br>应用先经过 SocketCAN，再进入内核中的设备驱动。</p><p><b>DMA 消费 ≠ CAN 成功</b><br>MM2S RD 前进仅表示 FPGA 取走了主机的数据。</p><p><b>ACK ≠ 应用确认</b><br>过滤掉数据的正常节点仍可发 ACK。</p><p><b>TxDone ≠ 对端回了一帧</b><br>当前驱动根据设备的发送报告完成本地 echo；它不是对端应用回复。</p><p><b>完成不是由中断触发</b><br>此驱动使用 delayed_work 轮询 S2MM，间隔受内核调度影响。</p></section></aside></div>
+<footer>依据当前 TOSUN M2044 驱动的经典 CAN 路径。FPGA 内部流水线、对端软件与失败场景为教学假设，不连接真实硬件。详见项目 README 与 SOURCE_MAP。</footer></main><script>(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.ProtocolLab = api;
+})(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
+
+  function integer(value, min, max, label) {
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < min || n > max) throw new Error(`${label}必须是 ${min}～${max} 的整数。`);
+    return n;
+  }
+  function positive(value, label) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) throw new Error(`${label}必须是大于 0 的有限数。`);
+    return n;
+  }
+  function parseData(input, maxBytes = 8) {
+    let bytes;
+    if (Array.isArray(input) || ArrayBuffer.isView(input)) bytes = Array.from(input);
+    else {
+      const text = String(input == null ? '' : input).trim();
+      if (!text) bytes = [];
+      else {
+        let tokens = text.split(/[\s,:_-]+/).filter(Boolean);
+        if (tokens.length === 1 && !/^0x/i.test(tokens[0]) && tokens[0].length > 2 && tokens[0].length % 2 === 0) tokens = tokens[0].match(/.{2}/g);
+        if (tokens.some(t => !/^(?:0x)?[\da-f]{1,2}$/i.test(t))) throw new Error('数据请输入十六进制字节，例如 DC 05 00 FF。');
+        bytes = tokens.map(t => parseInt(t.replace(/^0x/i, ''), 16));
+      }
+    }
+    if (bytes.length > maxBytes) throw new Error(`数据最多 ${maxBytes} 字节。`);
+    return bytes.map(n => integer(n, 0, 255, '数据字节'));
+  }
+  function canId(value) {
+    if (typeof value === 'string') {
+      if (!/^(?:0x)?[\da-f]{1,3}$/i.test(value.trim())) throw new Error('CAN ID 请输入 000～7FF 的十六进制数。');
+      value = parseInt(value.replace(/^0x/i, ''), 16);
+    }
+    return integer(value, 0, 0x7ff, '标准 CAN ID');
+  }
+  function timing(config = {}) {
+    const clockMHz = positive(config.clockMHz == null ? 160 : config.clockMHz, 'CAN 时钟 MHz');
+    if (clockMHz > 1000) throw new Error('本实验 CAN 时钟范围为大于 0 且不超过 1000 MHz。');
+    const brp = integer(config.brp == null ? 16 : config.brp, 1, 1024, '实际分频系数');
+    const tseg1 = integer(config.tseg1 == null ? 15 : config.tseg1, 1, 256, 'TSEG1');
+    const tseg2 = integer(config.tseg2 == null ? 4 : config.tseg2, 1, 128, 'TSEG2');
+    const totalTq = 1 + tseg1 + tseg2;
+    const tqNs = 1000 * brp / clockMHz;
+    const bitNs = totalTq * tqNs;
+    return { clockMHz, brp, tseg1, tseg2, totalTq, tqNs, bitNs, bitUs: bitNs / 1000,
+      bitrate: 1e9 / bitNs, samplePercent: (1 + tseg1) / totalTq * 100, sampleNs: (1 + tseg1) * tqNs };
+  }
+  function suggestTiming(clockMHz, bitrate, samplePercent = 80) {
+    const hz = positive(clockMHz, 'CAN 时钟 MHz') * 1e6;
+    bitrate = positive(bitrate, '目标位速率');
+    samplePercent = positive(samplePercent, '目标采样点');
+    if (samplePercent >= 100 || clockMHz > 1000) throw new Error('采样点应小于 100%，时钟不超过 1000 MHz。');
+    let best = null;
+    for (let totalTq = 3; totalTq <= 385; totalTq++) {
+      const idealBrp = hz / bitrate / totalTq;
+      for (const brp of new Set([Math.floor(idealBrp), Math.ceil(idealBrp)])) {
+      if (brp < 1 || brp > 1024) continue;
+      const tseg1 = Math.max(1, Math.min(256, totalTq - 2, Math.round(totalTq * samplePercent / 100) - 1));
+      const tseg2 = totalTq - 1 - tseg1;
+      if (tseg2 < 1 || tseg2 > 128) continue;
+      const t = timing({ clockMHz, brp, tseg1, tseg2 });
+      const errorPercent = (t.bitrate / bitrate - 1) * 100;
+      const score = Math.abs(errorPercent) * 1e6 + Math.abs(t.samplePercent - samplePercent) * 100 + Math.abs(totalTq - 20) * 0.001;
+      if (!best || score < best.score) best = { ...t, targetBitrate: bitrate, targetSamplePercent: samplePercent, errorPercent, score };
+      }
+    }
+    if (!best) throw new Error('在本实验的分频与 TQ 范围内无法找到配置。');
+    delete best.score;
+    return best;
+  }
+  function binary(value, width) {
+    return Array.from({ length: width }, (_, i) => (value >>> (width - i - 1)) & 1);
+  }
+  function bitsNumber(bits) { return bits.reduce((n, b) => (n << 1) | (typeof b === 'number' ? b : b.value), 0); }
+  function crc15(values) {
+    let crc = 0;
+    for (const v of values) {
+      const feedback = ((crc >>> 14) & 1) ^ (typeof v === 'number' ? v : v.value);
+      crc = (crc << 1) & 0x7fff;
+      if (feedback) crc ^= 0x4599;
+    }
+    return crc;
+  }
+  function fieldSegments(bits) {
+    const result = [];
+    for (let i = 0; i < bits.length; i++) {
+      const b = bits[i];
+      const last = result[result.length - 1];
+      if (last && last.name === b.field && last.byteIndex === b.byteIndex) { last.end++; last.length++; }
+      else result.push({ name: b.field, start: i, end: i + 1, length: 1, byteIndex: b.byteIndex });
+    }
+    return result;
+  }
+  function stuffBits(raw) {
+    const bits = [];
+    let last = -1, run = 0;
+    raw.forEach((b, rawIndex) => {
+      bits.push({ ...b, rawIndex, stuffed: false, index: bits.length });
+      run = b.value === last ? run + 1 : 1;
+      last = b.value;
+      if (run === 5) {
+        last = 1 - last;
+        bits.push({ value: last, field: b.field, rawIndex: null, stuffed: true, index: bits.length });
+        run = 1;
+      }
+    });
+    return bits;
+  }
+  function decodeCan(bits) {
+    const raw = [];
+    let cursor = 0, last = -1, run = 0, target = 34, dlc = 0;
+    function fail(code, detail) { return { ok: false, code, detail, raw, cursor, data: [], crc: null }; }
+    while (raw.length < target) {
+      if (cursor >= bits.length) return fail('format', '报文提前结束。');
+      const value = bits[cursor++].value;
+      raw.push(value);
+      run = value === last ? run + 1 : 1;
+      last = value;
+      if (raw.length === 19) {
+        dlc = bitsNumber(raw.slice(15, 19));
+        if (dlc > 8) return fail('format', '本实验只支持 DLC 0～8。');
+        target = 19 + dlc * 8 + 15;
+      }
+      if (run === 5) {
+        if (cursor >= bits.length || bits[cursor].value === last) return fail('stuff', `线上第 ${cursor + 1} 位违反位填充规则。`);
+        last = bits[cursor++].value;
+        run = 1;
+      }
+    }
+    if (raw[0] !== 0 || raw[12] !== 0 || raw[13] !== 0 || raw[14] !== 0) return fail('format', '起始位或标准数据帧格式不正确。');
+    const receivedCrc = bitsNumber(raw.slice(-15));
+    const calculatedCrc = crc15(raw.slice(0, -15));
+    const data = Array.from({ length: dlc }, (_, i) => bitsNumber(raw.slice(19 + i * 8, 27 + i * 8)));
+    const formatOffsets = [0, 2, 3, 4, 5, 6, 7, 8, 9];
+    if (formatOffsets.some(i => !bits[cursor + i] || bits[cursor + i].value !== 1)) return { ...fail('format', 'CRC 分隔符、ACK 分隔符或 EOF 的格式错误。'), crc: receivedCrc, calculatedCrc };
+    if (receivedCrc !== calculatedCrc) return { ...fail('crc', '接收端重新计算的 CRC 与帧内 CRC 不一致，丢弃这帧。'), crc: receivedCrc, calculatedCrc };
+    return { ok: true, code: 'valid', detail: '位填充、帧格式和 CRC 检查通过。', raw, cursor, id: bitsNumber(raw.slice(1, 12)), data, crc: receivedCrc, calculatedCrc };
+  }
+  function buildCan(config = {}) {
+    const id = canId(config.id == null ? 0x200 : config.id);
+    const data = parseData(config.data == null ? [0xdc, 0x05] : config.data);
+    const t = timing(config);
+    const receiver = config.receiver || 'normal';
+    if (!['normal', 'listen', 'missing'].includes(receiver)) throw new Error('接收节点模式无效。');
+    const fault = config.fault || 'none';
+    if (!['none', 'bitflip'].includes(fault)) throw new Error('故障类型无效。');
+    const filterId = config.filterId == null || config.filterId === '' ? null : canId(config.filterId);
+    const delayNs = Number(config.delayNs || 0);
+    if (!Number.isFinite(delayNs) || delayNs < 0 || delayNs > 1e8) throw new Error('边沿迟到时间应为 0～100000000 ns。');
+    const raw = [];
+    function add(field, values) { for (const value of values) raw.push({ value, field }); }
+    add('SOF', [0]); add('ID', binary(id, 11)); add('RTR', [0]); add('IDE', [0]); add('r0', [0]);
+    add('DLC', binary(data.length, 4));
+    data.forEach(byte => add('DATA', binary(byte, 8)));
+    const crc = crc15(raw);
+    add('CRC', binary(crc, 15));
+    const bits = stuffBits(raw);
+    const stuffCount = bits.filter(b => b.stuffed).length;
+    function tail(field, values) { values.forEach(value => bits.push({ value, field, rawIndex: null, stuffed: false, index: bits.length })); }
+    tail('CRC delimiter', [1]); tail('ACK', [1]); tail('ACK delimiter', [1]); tail('EOF', Array(7).fill(1)); tail('IFS', Array(3).fill(1));
+    const intendedBits = bits.map(b => ({ ...b }));
+    let faultIndex = null;
+    if (fault === 'bitflip') {
+      faultIndex = bits.findIndex(b => b.field === (data.length ? 'DATA' : 'CRC') && !b.stuffed);
+      bits[faultIndex].value ^= 1;
+      bits[faultIndex].fault = true;
+    }
+    const decoded = decodeCan(bits);
+    const timingOk = delayNs < t.sampleNs;
+    const valid = decoded.ok && timingOk;
+    const ack = receiver === 'normal' && valid;
+    const ackIndex = bits.findIndex(b => b.field === 'ACK');
+    bits[ackIndex].value = ack ? 0 : 1;
+    intendedBits[ackIndex].value = receiver === 'normal' ? 0 : 1;
+    const filterAccepted = filterId == null || decoded.id === filterId;
+    const delivered = receiver !== 'missing' && valid && filterAccepted;
+    let outcome;
+    if (receiver === 'missing') outcome = { ok: false, code: 'noack', title: 'ACK 错误：没有接收节点', detail: 'ACK 槽保持隐性 1，发送端未得到确认；自动重发取决于控制器配置。' };
+    else if (!timingOk) outcome = { ok: false, code: 'timing', title: '采样时序不足（简化模型）', detail: '相对本地位边界的边沿迟到/稳定时间已到达采样点，本实验判为不可可靠读取。它不是电缆单程延迟的直接判据。' };
+    else if (!decoded.ok) outcome = { ok: false, code: decoded.code, title: decoded.code === 'crc' ? '接收 CRC 校验失败' : decoded.code === 'stuff' ? '接收位填充检查失败' : '接收帧格式检查失败', detail: decoded.detail };
+    else if (receiver === 'listen') outcome = { ok: false, code: 'noack', title: '监听端可解码，发送端未获 ACK', detail: filterAccepted ? '监听端已正确解码，但监听模式不驱动 ACK；发送端认为本次发送失败。' : '监听端校验通过但被过滤，且监听模式不驱动 ACK；发送端认为本次发送失败。' };
+    else if (!filterAccepted) outcome = { ok: true, code: 'filtered', title: '总线发送成功，应用未收到', detail: '正常节点对有效帧发送 ACK；验收过滤器只决定是否交给应用，不决定是否 ACK。' };
+    else outcome = { ok: true, code: 'success', title: '发送成功，接收应用获得数据', detail: '接收端去填充并通过 CRC、格式检查，驱动 ACK，过滤通过后将数据交给应用。' };
+    const logs = [
+      `应用提交标准帧 ID 0x${id.toString(16).toUpperCase().padStart(3, '0')}，${data.length} 字节。`,
+      `控制器按 SOF、ID、控制字段、数据构造帧，CRC-15 为 0x${crc.toString(16).toUpperCase().padStart(4, '0')}。`,
+      `SOF 至 CRC 序列之间插入 ${stuffCount} 个填充位；线上共 ${bits.length - 3} 位，随后有 3 位 IFS。`,
+      `收发器用差分状态表示位：显性 0 约 2 V 差分；隐性 1 约 0 V 差分。`,
+      `每位 ${t.bitUs.toFixed(3)} μs，本地位起点后 ${(t.sampleNs / 1000).toFixed(3)} μs 采样（${t.samplePercent.toFixed(2)}%）。`
+    ];
+    if (faultIndex != null) logs.push(`接收端误读实验：把线上第 ${faultIndex + 1} 位翻转，保留后续帧用于检查。`);
+    logs.push(receiver === 'missing' ? '没有接收节点参与。' : timingOk ? decoded.detail : '边沿迟到超过简化时序预算。');
+    logs.push(ack ? '正常接收节点把 ACK 槽驱动为显性 0。' : 'ACK 槽保持隐性 1，发送端未获得确认。');
+    logs.push(outcome.detail);
+    return { protocol: 'CAN', id, data, bits, intendedBits, fields: fieldSegments(bits), timing: t, crc,
+      crcReceived: decoded.crc, crcCalculated: decoded.calculatedCrc, stuffCount, faultIndex, ack, ackIndex,
+      filterAccepted, receiver, delayNs, outcome, rxData: delivered ? decoded.data : [], rxBits: decoded.raw,
+      samples: bits.map((b, i) => ({ index: i, timeUs: (i * t.bitNs + t.sampleNs) / 1000, expected: intendedBits[i].value, actual: b.value, field: b.field, ok: timingOk && b.value === intendedBits[i].value })),
+      frameBitCount: bits.length - 3, durationUs: bits.length * t.bitUs, logs,
+      limits: [
+        '经典 CAN、11 位标准数据帧、0～8 字节；不包含 CAN FD/XL 或远程帧。',
+        '电压为高速 CAN 典型示意值；没有模拟模拟电路、反射、噪声及收发器电气门限。',
+        '边沿迟到指相对接收端本地位边界的稳定时间；固定传播延迟可由 SOF 同步吸收，真实仲裁还需往返传播预算。',
+        '位翻转用于接收解码实验；真实节点可能通过位监测更早中止。波形保留名义帧尾，不模拟错误标志、自动重发、错误计数和 Bus Off。',
+        '未实现完整振荡器漂移、重同步、SJW 和多节点传播；时序参数范围为实验范围，不代表某款芯片。'
+      ] };
+  }
+  function arbitrate(idA, idB) {
+    idA = canId(idA); idB = canId(idB);
+    const a = binary(idA, 11), b = binary(idB, 11), steps = [];
+    let activeA = true, activeB = true, lossIndex = null, winner = 'tie', loser = null;
+    for (let i = 0; i < 11; i++) {
+      const txA = activeA ? a[i] : 1, txB = activeB ? b[i] : 1;
+      const bus = txA & txB;
+      let lost = null;
+      if (activeA && txA === 1 && bus === 0) { activeA = false; lost = 'A'; winner = 'B'; loser = 'A'; lossIndex = i; }
+      if (activeB && txB === 1 && bus === 0) { activeB = false; lost = 'B'; winner = 'A'; loser = 'B'; lossIndex = i; }
+      steps.push({ index: i, a: a[i], b: b[i], txA, txB, bus, activeA, activeB, lost });
+    }
+    return { idA, idB, winner, loser, lossIndex, steps, detail: winner === 'tie' ? 'ID 相同，ID 字段未决出胜负；相同标准数据帧仲裁字段可以同时通过，数据不同可能导致位错误。' : `${winner} 获胜；${loser} 在 ID 的第 ${lossIndex + 1} 位发 1 却读到 0，退出仲裁并转为接收。此表仅展示 ID 位，省略共同填充位。` };
+  }
+  function buildUart(config = {}) {
+    const data = parseData(config.data == null ? [0x55, 0xa5] : config.data, 32);
+    if (!data.length) throw new Error('UART 实验至少输入一个数据字节。');
+    const baud = positive(config.baud == null ? 115200 : config.baud, '发送波特率');
+    const receiverBaud = positive(config.receiverBaud == null ? baud : config.receiverBaud, '接收波特率');
+    if (baud > 1e8 || receiverBaud > 1e8) throw new Error('UART 波特率应不超过 100000000。');
+    const parity = config.parity || 'none';
+    if (!['none', 'even', 'odd'].includes(parity)) throw new Error('请选择无校验、偶校验或奇校验。');
+    const delayNs = Number(config.delayNs || 0);
+    if (!Number.isFinite(delayNs) || delayNs < 0) throw new Error('传播延迟应为非负有限数。');
+    const bits = [], frames = [];
+    const bitUs = 1e6 / baud, rxBitUs = 1e6 / receiverBaud, delayUs = delayNs / 1000;
+    data.forEach((byte, byteIndex) => {
+      const start = bits.length;
+      function push(value, field) { bits.push({ value, field, byteIndex, stuffed: false, rawIndex: bits.length, index: bits.length }); }
+      push(0, 'START');
+      const values = Array.from({ length: 8 }, (_, i) => (byte >>> i) & 1);
+      values.forEach(v => push(v, 'DATA'));
+      if (parity !== 'none') push((values.reduce((a, b) => a + b, 0) % 2) ^ (parity === 'odd' ? 1 : 0), 'PARITY');
+      push(1, 'STOP');
+      frames.push({ byteIndex, byte, start, end: bits.length, startUs: start * bitUs + delayUs });
+    });
+    const samples = [], rxData = [];
+    let observedMismatch = false, framingError = false, parityError = false, sampleOutside = false;
+    function lineAt(timeUs) {
+      const i = Math.floor((timeUs - delayUs) / bitUs + 1e-10);
+      return i >= 0 && i < bits.length ? bits[i].value : 1;
+    }
+    for (const frame of frames) {
+      const values = [];
+      for (let j = 0; j < frame.end - frame.start; j++) {
+        const timeUs = frame.startUs + (j + 0.5) * rxBitUs;
+        const bit = bits[frame.start + j], actual = lineAt(timeUs);
+        const inWindow = timeUs >= frame.startUs + j * bitUs && timeUs < frame.startUs + (j + 1) * bitUs;
+        samples.push({ index: frame.start + j, timeUs, expected: bit.value, actual, field: bit.field, byteIndex: frame.byteIndex, ok: actual === bit.value, inWindow });
+        values.push(actual);
+        if (!inWindow) sampleOutside = true;
+        if (actual !== bit.value) observedMismatch = true;
+      }
+      const received = values.slice(1, 9).reduce((n, v, i) => n | (v << i), 0);
+      const frameOk = values[0] === 0 && values[values.length - 1] === 1;
+      const parityOk = parity === 'none' || ((values.slice(1, 10).reduce((a, b) => a + b, 0) % 2) === (parity === 'odd' ? 1 : 0));
+      framingError = framingError || !frameOk;
+      parityError = parityError || !parityOk;
+      Object.assign(frame, { received, framingOk: frameOk, parityOk, samples: samples.slice(-values.length) });
+      if (frameOk && parityOk) rxData.push(received);
+    }
+    let outcome;
+    if (framingError) outcome = { ok: false, code: 'framing', title: 'UART 帧错误', detail: '接收时钟偏差使起始位或停止位采样不符合格式，部分字节无法正确接收。' };
+    else if (parityError) outcome = { ok: false, code: 'parity', title: 'UART 奇偶校验失败', detail: '采样后的数据和校验位不满足所选奇偶规则。' };
+    else if (observedMismatch) outcome = { ok: false, code: 'corrupted', title: '数据被误读，UART 未必能察觉', detail: '采样值与发送值不同，但起始/停止位与所选校验仍通过；UART 没有 CAN 的 CRC 和 ACK。' };
+    else if (sampleOutside) outcome = { ok: true, code: 'margin', title: '此数据碰巧读对，时序裕量不足', detail: '至少一个采样点已偏出对应位区间；相邻位电平相同使本次读值仍一致，不能保证其他数据可靠。' };
+    else outcome = { ok: true, code: 'success', title: 'UART 接收完成', detail: '每个字节由起始位重新建立采样时序；按最低有效位优先还原字节，停止位及所选校验通过。' };
+    const logs = [
+      `应用提交 ${data.length} 字节，格式为 8${parity === 'none' ? 'N' : parity === 'even' ? 'E' : 'O'}1。`,
+      '发送器为每个字节加入起始位 0、8 位数据（LSB 优先）、可选校验位及停止位 1。',
+      `发送 ${baud} baud，每位 ${bitUs.toFixed(3)} μs；接收 ${receiverBaud} baud。`,
+      '接收端从每字节起始下降沿计时，半个位检查起始位，随后每个位中心采样。',
+      outcome.detail
+    ];
+    return { protocol: 'UART', data, baud, receiverBaud, parity, delayNs, bits, intendedBits: bits.map(b => ({ ...b })), fields: fieldSegments(bits),
+      timing: { bitrate: baud, bitNs: bitUs * 1000, bitUs, samplePercent: 50, sampleNs: bitUs * 500 }, samples, frames, rxData, outcome,
+      durationUs: bits.length * bitUs + delayUs, logs, limits: [
+        'UART 使用理想单端逻辑电平示意；不代表 RS-232 或 RS-485 的电气电压。',
+        '每个发送字节的起始沿都能被理想接收器重新捕获；严重失配时真实 UART 还可能漏掉起始沿，本模型不模拟该状态机。',
+        '采用理想中心单点采样；未模拟过采样、多数表决、抖动或噪声。固定传播延迟整体平移接收时间，不直接产生时钟失配。',
+        'UART 本身没有 CRC、仲裁和 ACK；应用层需要自行定义消息边界与可靠性机制。'
+      ] };
+  }
+  return { parseData, timing, suggestTiming, buildCan, buildUart, arbitrate, crc15, stuffBits, decodeCan };
+});
+</script><script>/* A deterministic teaching trace, based on the current host driver contract.
+ * No FPGA RTL, interrupt emulation, board access or wall-clock claims. */
+(function (root, factory) {
+  const wire = typeof module === 'object' && module.exports ? require('./wire.js') : root.ProtocolLab;
+  const api = factory(wire);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.FlowLab = api;
+})(typeof window !== 'undefined' ? window : globalThis, function (P) {
+  'use strict';
+  const RING_SIZE = 8 * 1024 * 1024;
+  const SCENARIOS = ['success', 'noack', 'listen', 'filtered', 'lost-report', 'txerror', 'ringfull'];
+  const SOURCE = {
+    xmit: 'tosun_pcie_core.c:1302 · tosun_pcie_can_start_xmit',
+    encode: 'tosun_pcie_protocol.c:67 · tosun_tsdev_encode_tx（标准 CAN 分支）',
+    echoPut: 'tosun_pcie_core.c:1360 · can_put_echo_skb',
+    publish: 'tosun_pcie_core.c:1364–1369 · ring_copy_to / dma_wmb / write_mm2s_producer',
+    poll: 'tosun_pcie_core.c:986 · tosun_pcie_poll_work（delayed_work）',
+    rx: 'tosun_pcie_protocol.c:288 · tosun_tsdev_decode_rx',
+    dispatch: 'tosun_pcie_core.c:564 · tosun_pcie_handle_rx_event',
+    complete: 'tosun_pcie_core.c:458 · tosun_pcie_complete_echo / can_get_echo_skb',
+    abort: 'tosun_pcie_core.c:480 · tosun_pcie_abort_echo / can_free_echo_skb',
+    consumer: 'tosun_pcie_core.c:950–971 · s2mm_rd / write_s2mm_consumer',
+    socket: 'Linux SocketCAN · PF_CAN / CAN_RAW / skb / ndo_start_xmit',
+    protocol: '经典 CAN · 标准数据帧 / CRC-15 / 位填充 / ACK',
+    model: '教学模型：未提供 FPGA RTL，内部模块与耗时不作实测结论'
+  };
+  function integer(n, min, max, name) {
+    n = Number(n);
+    if (!Number.isInteger(n) || n < min || n > max) throw new Error(`${name}必须是 ${min}～${max} 的整数。`);
+    return n;
+  }
+  function hex(n) { return '0x' + n.toString(16).toUpperCase(); }
+  function le(value, width) {
+    let n = BigInt(value);
+    const bytes = [];
+    for (let i = 0; i < width; i++) { bytes.push(Number(n & 255n)); n >>= 8n; }
+    return bytes;
+  }
+  function readLe(bytes, offset, width) {
+    let n = 0n;
+    for (let i = width - 1; i >= 0; i--) n = (n << 8n) | BigInt(bytes[offset + i]);
+    return Number(n);
+  }
+  function header(payloadLength, fdid, count = 0, type = 2) {
+    const a = [0xa5, count, ...le(payloadLength, 2)];
+    return [...a, ...a.map(b => (~b) & 255), type, 0, 0, 0, ...le(fdid, 2), 0, 0];
+  }
+  function packet(headerBytes, payload) {
+    return headerBytes.concat(payload, Array((16 - payload.length % 16) % 16).fill(0));
+  }
+  function txPacket(id, data, channel = 0) {
+    const payload = [...le(id, 4), channel, 1, 0, data.length, ...data];
+    return packet(header(payload.length, 16), payload);
+  }
+  function reportPacket(id, dataLength, channel = 0, error = false, timestampUs = 1000) {
+    const payload = [...le(timestampUs, 8), ...le(id, 4), channel, dataLength, error ? 0x81 : 0x01, 0];
+    // type=1 and timestamp are illustrative; host decoder does not enforce type.
+    return packet(header(payload.length, 12, 0, 1), payload);
+  }
+  function decodeReport(bytes) {
+    if (!Array.isArray(bytes) || bytes.length < 32 || bytes.some(b => !Number.isInteger(b) || b < 0 || b > 255)) throw new Error('上报包长度或字节无效。');
+    if (bytes[0] !== 0xa5 || [0, 1, 2, 3].some(i => ((~bytes[i]) & 255) !== bytes[4 + i])) throw new Error('业务头或反码校验失败。');
+    const payloadLength = readLe(bytes, 2, 2);
+    if (readLe(bytes, 12, 2) !== 12 || payloadLength < 16 || bytes.length < 16 + Math.ceil(payloadLength / 16) * 16) throw new Error('FDID 或负载长度不符合 CAN 上报格式。');
+    const status = bytes[30];
+    return { id: readLe(bytes, 24, 4), channel: bytes[28], dataLength: Math.min(bytes[29], 8), isTxReport: !!(status & 1), isError: !!(status & 0x80), status, timestampUs: readLe(bytes, 16, 8) };
+  }
+  function field(name, start, end, detail) { return { name, start, end, detail }; }
+  function commonFields(length, fdid, report = false) {
+    return [
+      field('业务头', 0, 16, `0xA5 头；length=${length}（不含补齐），FDID=${fdid}。与 CAN 线上帧不同。`),
+      field('标记 / 计数', 0, 2, 'A5 / 示例计数 0；真实驱动逐包递增 cnt。'),
+      field('length', 2, 4, '小端 16 位，只记录有效 payload 字节数。'),
+      field('反码', 4, 8, '前四个头字节的逐字节按位取反，用于校验业务包头。'),
+      field('type', 8, 9, report ? '本实验取 1 仅作示意；驱动接收解析未限定该字段。' : '2：主机编码的发送业务包。'),
+      field('FDID', 12, 14, `${fdid}：${report ? 'CAN RX / TX 完成共用上报类型' : 'CAN 发送请求'}，小端。`)
+    ];
+  }
+  function configOf(input) {
+    const id = integer(input.id == null ? 0x200 : input.id, 0, 0x7ff, '标准帧 ID');
+    const data = P.parseData(input.data == null ? [0xdc, 0x05] : input.data, 8);
+    const channel = integer(input.channel == null ? 0 : input.channel, 0, 3, '通道');
+    const bitrate = Number(input.bitrate == null ? 500000 : input.bitrate);
+    if (![125000, 250000, 500000, 1000000].includes(bitrate)) throw new Error('位速率请选择 125k、250k、500k 或 1M bit/s。');
+    const pollMs = integer(input.pollMs == null ? 1 : input.pollMs, 1, 1000, '轮询间隔 ms');
+    const scenario = input.scenario || 'success';
+    if (!SCENARIOS.includes(scenario)) throw new Error('未知实验场景。');
+    return { id, data, channel, bitrate, pollMs, scenario };
+  }
+  function build(input = {}) {
+    const config = configOf(input), { id, data, channel, bitrate, scenario, pollMs } = config;
+    const wire = P.buildCan({ id, data, receiver: scenario === 'noack' ? 'missing' : scenario === 'listen' ? 'listen' : 'normal', ...P.suggestTiming(160, bitrate, 80), delayNs: 0 });
+    const tx = txPacket(id, data, channel);
+    const txFields = commonFields(8 + data.length, 16).concat([
+      field('identifier', 16, 20, `${hex(id)}，小端 32 位；线上只发送标准 ID 的 11 位。`),
+      field('channel', 20, 21, `硬件通道 ${channel}。`),
+      field('ctrl_grp', 21, 22, '0x01：发送方向；本例非扩展、非 RTR。'),
+      field('fd_props', 22, 23, '0x00：经典 CAN，无 FD 属性。'),
+      field('DLC', 23, 24, `${data.length} 字节。`),
+      field('data', 24, 24 + data.length, '应用负载原样复制；不把整个 PCIe 包发送到 CAN 总线。'),
+      field('padding', 24 + data.length, 32, '环内按 16 字节补齐；补齐字节不是 CAN 数据。')
+    ]);
+    const reportFields = commonFields(16, 12, true).concat([
+      field('timestamp', 16, 24, '微秒时间戳，64 位小端；本实验取示例值，不是硬件实测。'),
+      field('identifier', 24, 28, '上报 ID；驱动使用每通道 FIFO echo 槽匹配，不按 ID 配对。'),
+      field('channel', 28, 29, '决定处理哪个硬件通道的 echo 队列。'),
+      field('DLC', 29, 30, '本请求的字节数。TX 完成上报可不携带 data 字段。'),
+      field('status_grp', 30, 31, 'bit0=TX report；bit7=error。0x01 成功路径，0x81 错误路径。'),
+      field('fd_props', 31, 32, '本例为 0，表示经典 CAN。')
+    ]);
+    let report = null;
+    const steps = [];
+    let state = { mm2sWr: scenario === 'ringfull' ? RING_SIZE : 0, mm2sRd: 0, s2mmWr: 0, s2mmRd: 0, echoPending: 0, txPackets: 0, txBytes: 0, txErrors: 0, queueStopped: false, ack: null, peerDelivered: false, hostDone: false, parsedBits: '', rxBytes: [], peerCrc: null, decodedId: null, decodedDlc: null, busTimeUs: 0 };
+    function add(key, lane, title, detail, source, evidence, patch = {}, bitIndex = null) {
+      state = { ...state, ...patch };
+      const snapshot = Object.freeze({ ...state, rxBytes: Object.freeze([...state.rxBytes]) });
+      steps.push(Object.freeze({ key, lane, title, detail, source, evidence, bitIndex, snapshot }));
+    }
+    add('app-send', 'app', '应用提交 CAN 报文', `write/send 提交 can_frame：ID=${hex(id)}，数据 ${data.map(x => x.toString(16).toUpperCase().padStart(2, '0')).join(' ') || '（零字节）'}。经典 can_frame 是 16 字节内存对象，不等于线上帧长度。`, SOURCE.socket, 'protocol');
+    add('socketcan', 'kernel', 'Linux SocketCAN 接收请求', 'PF_CAN/CAN_RAW 将消息交给 CAN 网络设备发送路径，数据由 skb 承载。驱动本身也运行在 Linux 内核中，并不是先经过驱动再进入内核。', SOURCE.socket, 'protocol');
+    add('start-xmit', 'driver', '进入驱动 ndo_start_xmit', `tosun_pcie_can_start_xmit 检查 skb 和通道状态，再调用当前 Makefile 链接的 tosun_tsdev_encode_tx。通道 ${channel}，正常发送模式。`, SOURCE.xmit, 'driver');
+    add('encode', 'driver', '把 skb 编成 PCIe 业务包', `16 字节业务头 + ${8 + data.length} 字节有效负载 + ${8 - data.length} 字节补齐，共 ${tx.length} 字节。FDID=16，ctrl_grp=0x01；这里还没有生成 CAN CRC 或位填充。`, SOURCE.encode, 'driver');
+    if (scenario === 'ringfull') {
+      add('ring-busy', 'mm2s', 'MM2S 容量不足，停止发送队列', '预置背景流量已占满 8 MiB 环。本次请求不写入环、不占 echo 槽；netif_stop_queue 后返回 NETDEV_TX_BUSY，由内核保留 skb 以便重试。此处还没有发生 CAN 发送。', SOURCE.xmit, 'driver', { queueStopped: true });
+    } else {
+      add('echo-reserve', 'echo', '保存待完成的本地 echo', 'can_put_echo_skb 保存当前 skb。驱动暂时不能增加 tx_packets，也不能把 NETDEV_TX_OK 当成对端已经收到。每通道 echo 环用 FIFO，32 槽布局最多保留 31 个在途请求。', SOURCE.echoPut, 'driver', { echoPending: 1 });
+      add('ring-copy', 'mm2s', '写入 DMA 一致性发送环', 'ring_copy_to 把 32 字节业务包复制到 MM2S 内存。数据已写内存，但生产者位置尚未公布给 FPGA。', SOURCE.publish, 'driver');
+      add('mm2s-publish', 'mm2s', '公布 MM2S 生产者位置', 'dma_wmb 保证数据写入顺序；mm2s_wr += 32，提交 echo 索引，再更新 BAR0 MM2S_WR（0x18/0x1c）。返回 NETDEV_TX_OK 仅表示请求已被驱动接受。', SOURCE.publish, 'driver', { mm2sWr: tx.length });
+      add('fpga-fetch', 'fpga-dma', 'FPGA DMA 取走业务包', 'FPGA 读取主机 DMA 环中的包，并推进 MM2S 消费者位置。这里的“DMA 已取走”与“CAN 已发送完成”是两个事件；echo 仍然在途。具体 DMA 内部实现以固件为准。', SOURCE.model, 'model', { mm2sRd: tx.length });
+      add('fpga-unpack', 'fpga-parser', 'FPGA 解析 0xA5 业务包', '示意解析头、FDID、通道、ID 和 DLC，丢弃环对齐填充。0xA5 头与补齐字节不会作为 CAN 数据上总线。', SOURCE.model, 'model');
+      add('mac-prepare', 'mac', 'CAN MAC 准备发送帧', `控制器准备 SOF、11 位 ID、控制字段和 ${data.length} 个数据字节，计算 CRC-15 并进行位填充。此帧共有 ${wire.frameBitCount} 个线上位（另有 3 位帧间隔）。`, SOURCE.protocol, 'protocol');
+      if (scenario === 'txerror') {
+        add('device-reject', 'mac', '注入设备拒绝发送事件', '本场景假定设备在真正驱动总线之前拒绝了发送请求，并明确生成带错误标志的 TX report。它不表示“只要没有 ACK 就一定会上报 0x81”。', SOURCE.model, 'model');
+      } else {
+        add('transceiver-ready', 'txphy', '发送收发器驱动 CAN_H / CAN_L', 'CAN MAC 输出 TXD。收发器将逻辑 0 转为显性差分电压（典型 H≈3.5 V、L≈1.5 V），将逻辑 1 转为隐性（两线约 2.5 V）。', SOURCE.protocol, 'protocol');
+        add('peer-synchronize', 'rxphy', scenario === 'noack' ? '对端未连接' : '对端等待 SOF 下降沿', scenario === 'noack' ? '发送端仍能观察总线，但没有对端接收器可以去填充、校验或发送 ACK。' : '对端收发器比较差分电压并输出 RXD；CAN 控制器利用 SOF 边沿同步，随后在每个位的采样点读取 RXD。', SOURCE.protocol, 'protocol');
+        const lastCrcIndex = wire.bits.reduce((last, b, i) => b.field === 'CRC' ? i : last, -1);
+        const eofLast = wire.bits.reduce((last, b, i) => b.field === 'EOF' ? i : last, -1);
+        const hasPeer = scenario !== 'noack';
+        let last = -1, run = 0, raw = [], dataBits = [];
+        for (let i = 0; i < wire.bits.length; i++) {
+          const b = wire.bits[i], patch = { busTimeUs: (i + wire.timing.samplePercent / 100) * wire.timing.bitUs };
+          let removed = false;
+          if (hasPeer && i <= lastCrcIndex) {
+            if (run === 5) {
+              if (b.value === last) throw new Error('内部错误：示意帧位填充无效。');
+              last = b.value; run = 1; removed = true;
+            } else {
+              raw.push(b.value); run = b.value === last ? run + 1 : 1; last = b.value;
+              if (b.field === 'DATA') dataBits.push(b.value);
+            }
+            patch.parsedBits = raw.join('');
+            if (raw.length >= 12) patch.decodedId = parseInt(raw.slice(1, 12).join(''), 2);
+            if (raw.length >= 19) patch.decodedDlc = parseInt(raw.slice(15, 19).join(''), 2);
+            patch.rxBytes = Array.from({ length: Math.floor(dataBits.length / 8) }, (_, j) => parseInt(dataBits.slice(j * 8, j * 8 + 8).join(''), 2));
+          }
+          let lane = 'bus';
+          let detail = `线上第 ${i + 1} 位，${b.field}=${b.value}。${b.value === 0 ? '显性：CAN_H≈3.5 V，CAN_L≈1.5 V，RXD=0。' : '隐性：CAN_H≈CAN_L≈2.5 V，RXD=1。'}${removed ? '对端识别为填充位并删除，不加入有效字段。' : hasPeer && i <= lastCrcIndex ? '对端在采样点读入并逐位组装字段。' : ''}`;
+          if (b.field === 'ACK') {
+            lane = 'peer-crc'; patch.ack = b.value === 0;
+            detail = b.value === 0 ? 'ACK 槽中发送节点 TXD=1，正常接收节点把总线拉成显性 0。发送端在自己的 RXD 上读到 0，获得总线确认；此时主机尚未收到 TxDone。ACK 不依赖应用过滤结果。' : 'ACK 槽保持隐性 1：没有正常接收节点驱动 ACK。发送端检测 ACK 错误。模型在这里停止本次尝试，不虚构固定重试次数、正常 EOF 或必然返回的失败报告。';
+          }
+          add('wire-' + i, lane, b.field === 'ACK' ? b.value === 0 ? '对端驱动 ACK，发送端读回 0' : 'ACK 槽未被确认' : `${b.field} · 线上位 ${i + 1} = ${b.value}`, detail, SOURCE.protocol, 'protocol', patch, i);
+          if (i === lastCrcIndex && hasPeer) {
+            const computed = P.crc15(raw.slice(0, -15));
+            const received = parseInt(raw.slice(-15).join(''), 2);
+            add('peer-crc-check', 'peer-crc', '对端重算 CRC 并比对', `去填充后计算 CRC=${hex(computed)}，帧内 CRC=${hex(received)}。CRC 检查通过不等于整个帧已经结束；后面还要检查界定符和 EOF。${scenario === 'listen' ? '该节点为只听模式，即使校验通过也不驱动 ACK。' : '正常节点准备在 ACK 槽确认。'}`, SOURCE.protocol, 'protocol', { peerCrc: computed === received }, i);
+          }
+          if (b.field === 'ACK' && b.value === 1) break;
+          if (i === eofLast) {
+            add('peer-accept-frame', 'peer-parser', '对端确认完整帧并还原报文', `EOF 格式有效，去填充后得到 ID=${hex(state.decodedId)}、DLC=${state.decodedDlc}，数据字节由采样结果还原。现在可以交给对端接收过滤与应用队列。`, SOURCE.protocol, 'protocol');
+          }
+        }
+        if (scenario === 'noack' || scenario === 'listen') {
+          add('await-confirmation', 'echo', '主机仍在等待完成上报', `echoPending=1，tx_packets=0。${scenario === 'listen' ? '只听节点可读出候选字段并通过 CRC，但本次发送未获 ACK；不把这次尝试宣称为有效应用交付。' : '没有对端接收和 ACK。'}真实控制器可能重试或随后上报错误，取决于固件与配置；当前源码无法决定这一过程的次数和耗时。`, SOURCE.model, 'model');
+        } else {
+          add('peer-deliver', 'peer-app', scenario === 'filtered' ? '对端过滤器拒绝交给应用' : '对端应用读取已还原数据', scenario === 'filtered' ? 'CAN 协议层已成功接收并 ACK，但本实验设置的对端应用过滤条件不匹配，所以对端应用不读取这帧。这不撤销已发生的 ACK。' : `对端应用取得 ${state.rxBytes.length} 个字节。应用层解释与 CAN 传输分开，例如前两字节可按小端 uint16 解码。对端读取与主机完成通知是独立路径，此顺序仅为演示编排。`, SOURCE.model, 'model', { peerDelivered: scenario !== 'filtered' });
+        }
+      }
+      if (scenario === 'lost-report') {
+        add('report-lost', 'report', '注入完成上报缺失', '总线上已有 ACK，对端已收帧，但设备完成上报未进入主机 S2MM。驱动不能仅凭 MM2S 消费指针增长就完成 echo；因此主机仍显示在途。', SOURCE.model, 'model');
+        add('poll-empty', 'poll', '轮询未发现新的 S2MM 上报', `delayed_work 以配置的 ${pollMs} ms 间隔安排检查。当前 S2MM_WR=RD=0，echoPending 仍为 1。实际调度延迟、重试与故障恢复未建模。`, SOURCE.poll, 'driver');
+      } else if (!['noack', 'listen'].includes(scenario)) {
+        const error = scenario === 'txerror';
+        report = reportPacket(id, data.length, channel, error, 1000);
+        const event = decodeReport(report);
+        add('build-report', 'report', error ? '设备生成错误 TX report' : '设备生成完成 TX report（TxDone）', `示意 32 字节上报：FDID=12，status_grp=${hex(event.status)}。${error ? 'bit0=1、bit7=1，表示发送方向错误事件。' : 'bit0=1、bit7=0，进入主机发送完成路径。'}这是一条 PCIe 内存业务消息，不是 CAN ACK 位。固件生成时机、type 和时间戳取值是模型假设。`, SOURCE.model, 'model');
+        add('s2mm-publish', 's2mm', 'DMA 写入 S2MM 并公布生产者', '示意设备先把上报内容写入接收环，再推进 S2MM_WR 32 字节。此时 echo 尚未释放，主机必须读到并处理上报。', SOURCE.model, 'model', { s2mmWr: report.length });
+        add('poll-report', 'poll', '驱动工作队列轮询到上报', `tosun_pcie_poll_work 调用 process_s2mm；当前驱动使用 delayed_work（配置间隔 ${pollMs} ms），不是中断或 NAPI。检测到生产者变化后，源码默认另有 100 μs 稳定等待，再 dma_rmb 读取；这些不是本实验的实测耗时。`, SOURCE.poll, 'driver');
+        add('decode-report', 'driver', '解析业务头与上报状态', `tosun_tsdev_decode_header 校验 0xA5、反码、长度，FDID=12 交给 decode_rx。解析得到 channel=${event.channel}、ID=${hex(event.id)}、is_tx_report=true、is_error=${event.isError}。TX report 可只带 16 字节固定负载，不强制携带 data。`, SOURCE.rx, 'driver');
+        if (error) {
+          add('abort-echo', 'echo', '失败完成：释放 echo 并计错误', 'handle_rx_event 先处理 is_error。TX 错误调用 tosun_pcie_abort_echo → can_free_echo_skb，释放最早的 echo 槽并增加 tx_errors。不会生成成功本地 echo，也不会增加 tx_packets。', SOURCE.abort, 'driver', { echoPending: 0, txErrors: 1, hostDone: true });
+        } else {
+          add('complete-echo', 'echo', '成功完成：消费最早的 echo 槽', 'handle_rx_event 识别 TX report，调用 tosun_pcie_complete_echo → can_get_echo_skb，推进 echo_get，增加 tx_packets 和 tx_bytes。关联依据是该通道的 FIFO 顺序，不是 ID 或请求 cookie。', SOURCE.complete, 'driver', { echoPending: 0, txPackets: 1, txBytes: data.length, hostDone: true });
+        }
+        add('s2mm-consume', 's2mm', '公布已消费的 S2MM 位置', '驱动处理事件后推进 s2mm_rd，dma_wmb 后写 BAR S2MM_RD（0x30/0x34），通知设备这些上报字节已经消费。随后轮询工作会检查并唤醒已停止的发送队列。', SOURCE.consumer, 'driver', { s2mmRd: report.length });
+        if (!error) add('local-echo', 'app', '本地 SocketCAN echo 可供接收', '配置允许本地回环的 CAN socket 可接收本地 echo；发送 socket 是否接收自身帧还取决于 CAN_RAW_RECV_OWN_MSGS 等选项。它来自主机保存的 skb，不是对端新发回的 CAN 报文。', SOURCE.socket, 'protocol');
+      }
+    }
+    return {
+      config, wire, txPacket: tx, txFields, reportPacket: report, reportFields, steps,
+      ringSize: RING_SIZE, echoCapacity: 31,
+      limits: [
+        '这是经典 CAN 标准数据帧的教学事件序列，不驱动板卡，不执行内核，不是 FPGA RTL 仿真或逻辑分析仪实测。',
+        '当前 Makefile 链接 tosun_pcie_protocol.c，未使用旧 tosun_pcie_protocol_classic.c；展示的主机包布局、echo、统计和轮询路径取自当前源码。',
+        '没有 FPGA RTL；内部 DMA、解析器、CAN MAC 分块与 ACK 后产生 TX report 的时序是教学假设。设备上报 type=1、cnt=0、timestamp=1000 μs 为示例。',
+        '仅总线各位按位速率计算协议时间；CPU、PCIe、FPGA 和工作队列事件没有人为编造的精确耗时。pollMs 是配置间隔，不是延迟保证。',
+        '对端应用交付与主机 TX 完成通知是独立路径；动画为了阅读按顺序展开，不代表两者存在因果或固定先后。',
+        'ACK 只是总线上的一个确认位；MM2S 消费、对端应用读取、S2MM TX report 和本地 echo 是不同事件。',
+        '无 ACK/只听场景停在本次 ACK 错误处；不展开真实错误标志、自动重发、错误计数、Bus Off 或后续固件报告。',
+        '“完成上报缺失”只模拟未到达 S2MM，不模拟 S2MM 覆盖与重新同步丢弃；真实源码在明确丢失边界会清空在途 echo 以防错配。',
+        '环容量不足场景用预置背景流量占满 8 MiB 环，本次请求没有入队；其他场景从空环和零统计开始。'
+      ]
+    };
+  }
+  return { build, txPacket, reportPacket, decodeReport, SCENARIOS, RING_SIZE };
+});
+</script><script>(() => {
+'use strict';
+const $=id=>document.getElementById(id), state={run:null,index:0,timer:null,packet:'tx',byte:0,dirty:false};
+const fieldCN={SOF:'起始位',ID:'标识符',RTR:'远程标志',IDE:'帧格式',r0:'保留位',DLC:'数据长度',DATA:'数据',CRC:'CRC 校验','CRC delimiter':'CRC 界定符',ACK:'确认槽','ACK delimiter':'ACK 界定符',EOF:'帧结束',IFS:'帧间隔'};
+const S='http://www.w3.org/2000/svg', C={green:'#087d73',blue:'#3766b0',ink:'#1b2c40',muted:'#64778b',grid:'#e5ebf2',amber:'#b47718',red:'#b7434c'};
+const hex=n=>Number(n).toString(16).toUpperCase().padStart(2,'0'), num=(n,d=2)=>Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+function node(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
+function svg(tag,attrs,text){const e=document.createElementNS(S,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(text!=null)e.textContent=text;return e;}
+function line(r,x1,y1,x2,y2,color=C.grid,width=1,dash=''){r.append(svg('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width,'stroke-dasharray':dash}));}
+function label(r,x,y,text,color=C.muted,size=10,anchor='start'){r.append(svg('text',{x,y,fill:color,'font-size':size,'text-anchor':anchor,'font-family':'Segoe UI,Microsoft YaHei,sans-serif'},text));}
+function current(){return state.run.steps[state.index];}
+function stop(){clearInterval(state.timer);state.timer=null;$('play').textContent='▶ 播放';}
+function markDirty(){stop();state.dirty=true;$('config-note').textContent='配置已修改，点击“生成 / 重置”应用；右侧仍为上次实验。';}
+function build(){stop();try{let id=$('identifier').value.trim().replace(/^0x/i,'');if(!/^[0-9a-f]{1,3}$/i.test(id)||parseInt(id,16)>0x7ff)throw Error('标准 CAN ID 应为 000–7FF 的十六进制数。');if(!$('poll').value.trim())throw Error('请填写轮询间隔。');state.run=FlowLab.build({id:parseInt(id,16),data:$('payload').value,channel:Number($('channel').value),bitrate:Number($('bitrate').value),scenario:$('scenario').value,pollMs:Number($('poll').value)});state.index=0;state.packet='tx';state.byte=0;state.dirty=false;$('validation').hidden=true;$('config-note').textContent='实验已生成。播放或单步查看；驱动属于内核，ACK 与 TxDone 分别更新。';$('seek').max=state.run.steps.length-1;renderEvents();render();}catch(e){$('validation').hidden=false;$('validation').textContent=e.message;}}
+function select(i){state.index=Math.max(0,Math.min(state.run.steps.length-1,Number(i)));render();}
+function jumpIndex(lane){return lane==='echo'?state.run.steps.findIndex(s=>['complete-echo','abort-echo','await-confirmation','poll-empty'].includes(s.key)):state.run.steps.findIndex(s=>s.lane===lane);}
+function jumpLane(lane){const i=jumpIndex(lane);if(i>=0){stop();select(i);}}
+function render(){const step=current(),s=step.snapshot,r=state.run;
+ $('position').textContent=`${state.index+1} / ${r.steps.length}`;$('seek').value=state.index;$('previous').disabled=state.index===0;$('next').disabled=state.index===r.steps.length-1;
+ const evidence={driver:'驱动代码依据',protocol:'CAN / Linux 协议依据',model:'教学假设'};
+ const detail=$('event-detail');detail.replaceChildren();detail.append(node('span',evidence[step.evidence]||'教学模型','tag evidence'),node('h3',step.title),node('p',step.detail),node('code',step.source||'教学模型：不对应 FPGA RTL 周期。'));
+ const visited=new Set(r.steps.slice(0,state.index+1).map(x=>x.lane));document.querySelectorAll('[data-node]').forEach(e=>{const id=e.dataset.node;e.classList.toggle('active',id===step.lane);e.classList.toggle('visited',visited.has(id));const at=r.steps.findIndex(x=>x.lane===id);e.disabled=at<0&&!(step.bitIndex!=null&&['txphy','rxphy','peer-parser','mac'].includes(id));e.setAttribute('aria-pressed',id===step.lane);});
+ if(step.bitIndex!=null){document.querySelectorAll('[data-node="txphy"],[data-node="rxphy"],[data-node="peer-parser"]').forEach(e=>e.classList.add('active'));}
+ $('bus-band').classList.toggle('active',step.bitIndex!=null||step.lane==='bus');
+ status('status-dma',s.mm2sRd>0?'已取走 · 不等于发送成功':'尚未',s.mm2sRd>0?'good':'');status('status-ack',s.ack==null?'尚未到达':s.ack?'已收到 · 显性 0':'未收到 · 隐性 1',s.ack==null?'':s.ack?'good':'bad');status('status-peer',s.peerDelivered?'已交付应用':r.config.scenario==='filtered'&&state.run.steps.slice(0,state.index+1).some(t=>t.key==='peer-deliver')?'过滤，未交付':'尚未',s.peerDelivered?'good':'');status('status-done',s.txErrors?'失败报告已处理':s.hostDone?'已处理成功报告':s.echoPending?'等待完成报告':'尚未',s.txErrors?'bad':s.hostDone?'good':s.echoPending?'warn':'');
+ $('mm2s-pointers').textContent=`WR ${num(s.mm2sWr)} / RD ${num(s.mm2sRd)} B`;$('s2mm-pointers').textContent=`WR ${num(s.s2mmWr)} / RD ${num(s.s2mmRd)} B`;$('mm2s-fill').style.width=Math.min(100,Math.max(0,s.mm2sWr-s.mm2sRd)/r.txPacket.length*100)+'%';$('s2mm-fill').style.width=Math.min(100,Math.max(0,s.s2mmWr-s.s2mmRd)/(r.reportPacket?.length||32)*100)+'%';
+ const counters=$('counter-grid');counters.replaceChildren();[['待完成 echo',s.echoPending],['tx_packets',s.txPackets],['tx_errors',s.txErrors],['发送队列',s.queueStopped?'停止':'可用']].forEach(([t,v])=>{const e=node('div');e.append(node('span',t),node('b',String(v)));counters.append(e);});
+ document.querySelectorAll('#events button').forEach(e=>{const start=+e.dataset.start,end=+e.dataset.end;e.classList.toggle('active',state.index>=start&&state.index<end);e.classList.toggle('past',state.index>=end);});
+ const activeEvent=$('events').querySelector('.active');if(activeEvent){const a=activeEvent.getBoundingClientRect(),n=$('events').getBoundingClientRect();if(a.top<n.top||a.bottom>n.bottom)$('events').scrollTop+=a.top-n.top-n.height/2+a.height/2;}
+ document.querySelectorAll('[data-jump]').forEach(e=>e.disabled=jumpIndex(e.dataset.jump)<0);$('jump-ack').disabled=!r.steps.some(x=>x.bitIndex!=null&&r.wire.bits[x.bitIndex].field==='ACK');
+ drawConnections();drawWire();renderPacket();
+}
+function status(id,text,cls){$(id).textContent=text;$(id).className=cls;}
+function renderEvents(){const root=$('events');root.replaceChildren();const steps=state.run.steps,groups=[];steps.forEach((s,i)=>{const field=s.key.startsWith('wire-')?state.run.wire.bits[s.bitIndex].field:null,last=groups.at(-1);if(field&&last?.field===field&&last.end===i){last.end=i+1;last.count++;}else groups.push({field,start:i,end:i+1,count:1,title:s.title});});groups.forEach(g=>{const b=node('button');b.dataset.start=g.start;b.dataset.end=g.end;b.append(node('span',String(g.start+1).padStart(2,'0')),document.createTextNode(g.field?`${fieldCN[g.field]||g.field} · ${g.count} 位`:g.title));b.onclick=()=>{stop();select(g.start);};root.append(b);});$('event-count').textContent=steps.length+' 个步骤';}
+function drawConnections(){const root=$('connections'),box=$('topology').getBoundingClientRect();root.replaceChildren();root.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);const st=current(),prev=state.run.steps[state.index-1];let from=prev?.lane,to=st.lane;
+ if(st.bitIndex!=null){const b=state.run.wire.bits[st.bitIndex];from=b.field==='ACK'?'peer-crc':'txphy';to=b.field==='ACK'?'mac':'rxphy';}
+ function center(id){const el=document.querySelector(`[data-node="${id}"]`)||(id==='bus'?$('bus-band'):null);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left-box.left+r.width/2,y:r.top-box.top+r.height/2,w:r.width,h:r.height};}
+ const a=center(from),b=center(to);if(!a||!b||from===to)return;const horizontal=Math.abs(a.x-b.x)>Math.abs(a.y-b.y);const ax=a.x+(horizontal?Math.sign(b.x-a.x)*a.w/2:0),ay=a.y+(horizontal?0:Math.sign(b.y-a.y)*a.h/2),bx=b.x-(horizontal?Math.sign(b.x-a.x)*b.w/2:0),by=b.y-(horizontal?0:Math.sign(b.y-a.y)*b.h/2);const curve=horizontal?`M${ax},${ay} C${(ax+bx)/2},${ay} ${(ax+bx)/2},${by} ${bx},${by}`:`M${ax},${ay} C${ax},${(ay+by)/2} ${bx},${(ay+by)/2} ${bx},${by}`;
+ const defs=svg('defs',{}),marker=svg('marker',{id:'arrow',markerWidth:7,markerHeight:7,refX:5,refY:3,orient:'auto'});marker.append(svg('path',{d:'M0 0 L6 3 L0 6',fill:'none',stroke:C.blue,'stroke-width':1.4}));defs.append(marker);root.append(defs,svg('path',{d:curve,fill:'none',stroke:C.blue,'stroke-width':1.7,'marker-end':'url(#arrow)'}));const dot=svg('circle',{r:4,fill:C.blue});if(!matchMedia('(prefers-reduced-motion: reduce)').matches){dot.append(svg('animateMotion',{dur:Math.max(.1,Number($('speed').value)/1000*.8)+'s',repeatCount:1,fill:'freeze',path:curve}));}else{dot.setAttribute('cx',bx);dot.setAttribute('cy',by);}root.append(dot);
+}
+function latestBit(){for(let i=state.index;i>=0;i--)if(state.run.steps[i].bitIndex!=null)return state.run.steps[i].bitIndex;return -1;}
+function drawWire(){const root=$('wave'),r=state.run,st=current(),s=st.snapshot,w=root.clientWidth||850,h=225,left=48,right=w-8,bits=r.wire.bits;const last=latestBit(),count=Math.max(7,Math.min(24,Math.floor((w-left)/28))),start=Math.max(0,Math.min(bits.length-count,last<0?0:last-Math.floor(count/3))),end=Math.min(bits.length,start+count),dx=(right-left)/(end-start),x=i=>left+(i-start)*dx;root.replaceChildren();root.setAttribute('viewBox',`0 0 ${w} ${h}`);
+ $('wire-clock').textContent=`${num(r.wire.timing.bitUs)} μs / bit · 采样 ${num(r.wire.timing.samplePercent)}%`;
+ const reached=last>=0;if(reached&&last>=start&&last<end)root.append(svg('rect',{x:x(last),y:9,width:dx,height:180,fill:'#e8f1fb'}));
+ [[3.5,35],[2.5,65],[1.5,95]].forEach(([v,y])=>{line(root,left,y,right,y);label(root,0,y+4,v+' V');});label(root,0,149,'RX 1');label(root,0,178,'RX 0');
+ for(let i=start;i<=end;i++){line(root,x(i),12,x(i),190);if((i-start)%Math.ceil(count/6)===0)label(root,x(i),208,num(i*r.wire.timing.bitUs,1),C.muted,9,'middle');}label(root,right,222,'线上时间 / μs',C.muted,9,'end');
+ const trace=(map,color)=>{let d=`M${left-8} ${map(1)}`;for(let i=start;i<end;i++){let y=map(i<=last?bits[i].value:1);d+=` L${x(i)} ${i===start?map(start?bits[start-1].value:1):map(i-1<=last?bits[i-1].value:1)} L${x(i)} ${y} L${x(i+1)} ${y}`;}root.append(svg('path',{d,fill:'none',stroke:color,'stroke-width':1.8}));};trace(v=>v?65:35,C.green);trace(v=>v?65:95,C.blue);trace(v=>v?145:174,C.ink);
+ for(let i=start;i<end&&i<=last;i++)root.append(svg('circle',{cx:x(i)+dx*r.wire.timing.samplePercent/100,cy:bits[i].value?145:174,r:2.7,fill:C.amber}));
+ const bit=last>=0?bits[last]:null,wireActive=st.bitIndex!=null;const ackBit=bit?.field==='ACK';$('bus-label').textContent=wireActive?(ackBit?`ACK 槽 · ${bit.value===0?'对端驱动显性 0':'无人确认，保持 1'}`:`${bit.value===0?'显性 0 · H−L ≈ 2 V':'隐性 1 · H−L ≈ 0 V'}`):last<0?'尚未发送 · 总线空闲':'位流已暂停 / 结束';
+ $('bit-info').textContent=bit?`最近线上位 #${last+1} · ${fieldCN[bit.field]||bit.field} · ${bit.stuffed?'填充位，接收时删除':'有效协议位'}${ackBit?' · 发送端 TXD=1，接收端 '+(bit.value===0?'TXD=0':'未驱动')+' → 总线='+bit.value:''}`:'还没有位进入总线。先观察应用、内核和 DMA 的处理。';
+ const list=$('bits');list.replaceChildren();for(let i=start;i<end;i++){const bt=node('button',i<=last?String(bits[i].value):'·');bt.classList.toggle('selected',i===last);bt.classList.toggle('stuffed',bits[i].stuffed);bt.classList.toggle('future',i>last);bt.setAttribute('aria-label',`跳到线上第${i+1}位 ${bits[i].field}`);const at=r.steps.findIndex(t=>t.bitIndex===i);bt.disabled=at<0;bt.onclick=()=>{stop();select(at);};list.append(bt);}
+ $('sampled').textContent=bit?String(bit.value):'—';$('sample-detail').textContent=bit?(bit.stuffed?'删除填充位':ackBit?'ACK 状态，不是数据字节':'送入协议解析'):'等待总线';$('raw-bits').textContent=s.parsedBits?(s.parsedBits.length>56?'… ':'')+s.parsedBits.slice(-56).replace(/(.{8})/g,'$1 '):'等待采样 / 去填充';let raw=s.parsedBits||'';const parsedId=s.decodedId??(raw.length>=12?parseInt(raw.slice(1,12),2):null),dlc=s.decodedDlc??(raw.length>=19?parseInt(raw.slice(15,19),2):null);$('parsed-id').textContent=`ID ${parsedId==null?'—':'0x'+hex(parsedId)} · DLC ${dlc==null?'—':dlc}`;$('rx-bytes').textContent='DATA '+((s.rxBytes||[]).length?s.rxBytes.map(hex).join(' '):'—');
+ root.onclick=e=>{const rect=root.getBoundingClientRect(),i=Math.floor((e.clientX-rect.left-left)/dx)+start,at=r.steps.findIndex(t=>t.bitIndex===i);if(at>=0){stop();select(at);}};
+}
+function renderPacket(){const r=state.run,s=current().snapshot,isTx=state.packet==='tx',packet=isTx?r.txPacket:r.reportPacket,fields=isTx?r.txFields:r.reportFields;$('packet-tx').classList.toggle('active',isTx);$('packet-rx').classList.toggle('active',!isTx);const fieldsRoot=$('packet-fields'),grid=$('hex-grid');fieldsRoot.replaceChildren();grid.replaceChildren();
+ if(!packet){$('packet-caption').textContent='本场景没有设备完成报告。CAN ACK 不会自动在主机内存里变成一个 TxDone。';$('byte-detail').textContent='S2MM 中没有可解析的发送报告。';$('packet-parse').textContent='驱动保持待完成 echo；本实验不编造固件的重试次数、超时和报告策略。';return;}
+ state.byte=Math.min(state.byte,packet.length-1);$('packet-caption').textContent=isTx?`${packet.length} 字节 · 16 B 业务头 + 有效负载 + 16 B 对齐填充。${s.mm2sWr&&r.config.scenario!=='ringfull'?'本次发送包已提交。':'这是待提交格式预览。'}`:`${packet.length} 字节 · FDID 12 设备事件。${s.s2mmWr?'已写入 S2MM。':'尚未回传，显示本场景预期报告格式。'}时间戳、type 与报告时机为教学设定。`;
+ const selected=fields?.filter(f=>state.byte>=f.start&&state.byte<f.end).sort((a,b)=>(a.end-a.start)-(b.end-b.start))[0];(fields||[]).filter(f=>f.end>f.start).forEach(f=>{const b=node('button',f.name);b.classList.toggle('active',f===selected);b.onclick=()=>{state.byte=f.start;renderPacket();};fieldsRoot.append(b);});packet.forEach((v,i)=>{const b=node('button');b.append(node('small',i.toString(16).toUpperCase().padStart(2,'0')),document.createTextNode(hex(v)));b.classList.toggle('active',i===state.byte);b.classList.toggle('data',isTx&&i>=24&&i<24+r.config.data.length);b.setAttribute('aria-label',`字节偏移${i} 值${hex(v)}`);b.onclick=()=>{state.byte=i;renderPacket();};grid.append(b);});$('byte-detail').textContent=`偏移 0x${hex(state.byte)} · 值 0x${hex(packet[state.byte])} · ${selected?.name||'业务字段'}：${selected?.detail||'多字节字段按小端解释。'}`;
+ $('packet-parse').textContent=isTx?`FPGA 解析：去掉 0xA5 业务头与对齐字节，取得 ID 0x${hex(r.config.id)}、通道 ${r.config.channel}、DLC ${r.config.data.length}、DATA ${r.config.data.map(hex).join(' ')||'空'}。0xA5 业务头不会被原样发到 CAN 总线上。`:`驱动解析：status_grp = 0x${hex(packet[30])} → is_tx_report = ${!!(packet[30]&1)}，is_error = ${!!(packet[30]&128)}。${packet[30]&128?'释放失败 echo，不计成功发送。':'按同通道 FIFO 完成最早的 echo；不是靠 ID 查找，也不是对端应用回包。'}`;
+}
+function play(){if(state.timer){stop();return;}if(state.dirty){build();if(state.dirty)return;}if(state.index===state.run.steps.length-1)select(0);$('play').textContent='Ⅱ 暂停';state.timer=setInterval(()=>{if(state.index>=state.run.steps.length-1){stop();return;}select(state.index+1);},Number($('speed').value));}
+$('config-form').onsubmit=e=>{e.preventDefault();build();};document.querySelectorAll('#config-form input,#config-form select').forEach(e=>e.oninput=markDirty);$('play').onclick=play;$('next').onclick=()=>{stop();select(state.index+1);};$('previous').onclick=()=>{stop();select(state.index-1);};$('reset').onclick=()=>{stop();select(0);};$('finish').onclick=()=>{stop();select(state.run.steps.length-1);};$('seek').oninput=()=>{stop();select($('seek').value);};$('speed').onchange=()=>{if(state.timer){stop();play();}};
+document.querySelectorAll('[data-jump]').forEach(e=>e.onclick=()=>jumpLane(e.dataset.jump));document.querySelectorAll('[data-node]').forEach(e=>e.onclick=()=>{const lane=e.dataset.node;if(['txphy','rxphy','peer-parser'].includes(lane)&&!state.run.steps.some(s=>s.lane===lane))jumpLane('bus');else jumpLane(lane);});$('jump-ack').onclick=()=>{const i=state.run.steps.findIndex(s=>s.bitIndex!=null&&state.run.wire.bits[s.bitIndex].field==='ACK');if(i>=0){stop();select(i);}};
+$('packet-tx').onclick=()=>{state.packet='tx';state.byte=0;renderPacket();};$('packet-rx').onclick=()=>{state.packet='rx';state.byte=0;renderPacket();};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({description:'离线教学模拟，非硬件实测',currentStep:state.index,simulation:state.run},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='can-end-to-end-trace.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+new ResizeObserver(()=>{if(state.run){drawConnections();drawWire();}}).observe($('topology'));build();
+})();
+</script></body></html>
