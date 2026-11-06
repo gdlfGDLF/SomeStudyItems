@@ -63,5 +63,6 @@ $('config-form').onsubmit=e=>{e.preventDefault();build();};document.querySelecto
 document.querySelectorAll('[data-jump]').forEach(e=>e.onclick=()=>jumpLane(e.dataset.jump));document.querySelectorAll('[data-node]').forEach(e=>e.onclick=()=>{const lane=e.dataset.node;if(['txphy','rxphy','peer-parser'].includes(lane)&&!state.run.steps.some(s=>s.lane===lane))jumpLane('bus');else jumpLane(lane);});$('jump-ack').onclick=()=>{const i=state.run.steps.findIndex(s=>s.bitIndex!=null&&state.run.wire.bits[s.bitIndex].field==='ACK');if(i>=0){stop();select(i);}};
 $('packet-tx').onclick=()=>{state.packet='tx';state.byte=0;renderPacket();};$('packet-rx').onclick=()=>{state.packet='rx';state.byte=0;renderPacket();};
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify({description:'离线教学模拟，非硬件实测',currentStep:state.index,simulation:state.run},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='can-end-to-end-trace.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-new ResizeObserver(()=>{if(state.run){drawConnections();drawWire();}}).observe($('topology'));build();
+window.addEventListener('lab-protocol-change',stop);
+new ResizeObserver(()=>{if(state.run&&!$('can-lab').hidden){drawConnections();drawWire();}}).observe($('topology'));build();
 })();
