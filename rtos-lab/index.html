@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RTOS 与寄存器实验室</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="../学习导航.html"><span class="brand-icon">▦</span>嵌入式学习实验室</a><span class="offline">● 离线运行 · 无需板卡</span><button id="export">导出实验记录</button></header>
+<main>
+<section class="intro"><div><p class="eyebrow">PS SOFTWARE / 从硬件事件到任务执行</p><h1>谁改了状态，谁获得 CPU？</h1><p>先预测，再单步验证。把寄存器、中断和任务调度连接起来。</p></div><div class="chapter">LAB <strong>05</strong></div></section>
+<nav class="tabs" aria-label="实验类别"><button data-kind="registers" aria-pressed="true"><span>01</span><div><b>寄存器与中断</b><small>写一个数，硬件发生什么</small></div></button><button data-kind="rtos" aria-pressed="false"><span>02</span><div><b>RTOS 任务调度</b><small>就绪、阻塞与优先级</small></div></button></nav>
+<div class="workspace">
+<aside>
+<section class="panel"><p class="eyebrow">选择一组实验</p><div id="scenarios" class="scenario-list"></div></section>
+<section class="panel prediction"><p class="eyebrow">先想一下</p><h2 id="quiz-question"></h2><div id="quiz-options"></div><p id="quiz-answer" role="status" hidden></p></section>
+<section class="panel takeaway"><h2>带着这个问题观察</h2><p id="takeaway"></p><button id="compare">切换对照场景 →</button></section>
+</aside>
+<div class="content">
+<section class="panel config"><div class="section-head"><div><p class="eyebrow" id="kind-label"></p><h2 id="title"></h2></div><span class="badge">可重放的逻辑模型</span></div><p id="description"></p>
+<form id="config-form"><div id="rtos-options" hidden><label>采集任务每轮工作量<select id="work"><option value="1">1 个时间单位</option><option value="2" selected>2 个时间单位</option><option value="3">3 个时间单位</option><option value="4">4 个时间单位</option></select></label><label>观察窗口<select id="horizon"><option value="12">12 个时间单位</option><option value="18" selected>18 个时间单位</option><option value="30">30 个时间单位</option><option value="36">36 个时间单位</option></select></label></div><button type="submit">生成 / 重置</button><span id="dirty" class="fine"></span></form><p id="validation" role="alert" hidden></p></section>
+<section class="panel playback"><div class="section-head"><h2>跟随每一次状态变化</h2><div class="controls"><button id="previous">上一步</button><button id="play" class="primary">播放</button><button id="next">下一步</button><button id="finish">到结果</button><select id="speed" aria-label="播放速度"><option value="1100">慢速</option><option value="650" selected>中速</option><option value="150">快速</option></select></div></div>
+<div class="scrubber"><span id="position"></span><input id="seek" type="range" min="0" value="0" aria-label="实验进度"></div>
+<article id="event" aria-live="polite"><p id="event-label"></p><h3 id="event-title"></h3><p id="event-detail"></p></article>
+<div id="result" hidden></div>
+</section>
+<section id="register-view" class="panel"><div class="section-head"><h2>寄存器快照</h2><span class="fine">偏移属于虚拟外设；位格展示低 8 位</span></div><div id="registers"></div><div class="signal-path" id="signals"></div><p class="fine">RW：普通读写 · RO：只读 · W1C：写入的 1 清除对应位，0 保持。DONE = bit 0，ERROR = bit 1。</p></section>
+<section id="scheduler-view" class="panel" hidden><div class="section-head"><h2>调度事件时间线</h2><span class="fine">点击已发生的格子回看；浅灰格子尚未发生</span></div><div class="legend"><span class="h">H 高优先级</span><span class="m">M 中优先级</span><span class="l">L 低优先级</span><span class="isr">ISR 中断</span><span>— 空闲 / 初态</span></div><div class="timeline-scroll"><div id="timeline"></div></div><p class="fine">每格是一条事件，格子宽度不表示耗时。时间为离散教学单位。运行区间步骤显示区间开始时的状态；其他步骤显示动作后的状态。时间线标明执行者。中断可能与任务处于同一时间单位，详见事件说明。</p><div class="table-scroll"><table><thead><tr><th>任务</th><th>基础 → 有效优先级</th><th>状态</th><th>等待 / 工作</th></tr></thead><tbody id="tasks"></tbody></table></div><div id="scheduler-status" class="signal-path"></div></section>
+<div class="details-grid"><section class="code-panel"><div class="section-head"><h2>这一刻的操作</h2><span>概念代码 · 非板卡程序</span></div><pre id="code"></pre></section><section class="panel"><h2>已发生的事件</h2><ol id="log"></ol></section></div>
+<details class="panel sources"><summary>模型假设、上板区别与官方资料</summary><ul id="limits"></ul><p>真实 Linux 驱动使用 MMIO/DMA 等内核接口；裸机或 RTOS 使用对应 BSP。这里的伪代码不提供可直接写入板卡的地址。volatile 不保证原子性、访问顺序或 DMA 缓存一致性。</p><a href="https://kernel.org/doc/html/next/driver-api/device-io.html" target="_blank" rel="noreferrer">Linux：MMIO 与寄存器访问</a><a href="https://github.freertos.org/Documentation/02-Kernel/02-Kernel-features/01-Tasks-and-co-routines/04-Task-scheduling" target="_blank" rel="noreferrer">FreeRTOS：任务调度</a><a href="https://freertos.org/Real-time-embedded-RTOS-mutexes.html" target="_blank" rel="noreferrer">FreeRTOS：互斥锁与优先级继承</a></details>
+</div></div>
+<footer>模型用于解释逻辑关系，不执行硬件操作，也不模拟真实 FreeRTOS 内核。可双击同目录“RTOS与寄存器实验室.html”独立使用。</footer>
+</main><script src="registers.js"></script><script src="scheduler.js"></script><script src="app.js"></script>
+</body></html>

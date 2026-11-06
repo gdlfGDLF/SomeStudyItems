@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RTOS 与寄存器实验室</title><style>:root{--ink:#213c46;--muted:#607c87;--teal:#087f80;--line:#d9e5e6;--bg:#f2f6f5;--amber:#a56a1b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 "Segoe UI","Microsoft YaHei",sans-serif}button,input,select{font:inherit;color:inherit}button,select{border:1px solid #ccdcdc;background:white;border-radius:7px;padding:8px 12px}button{cursor:pointer}button:hover{background:#edf6f3}button:disabled{opacity:.42;cursor:default}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #7cbab9;outline-offset:3px}h1,h2,h3,p{margin:0}h1{font-size:32px;letter-spacing:-.6px;line-height:1.4;margin:7px 0 12px}h2{font-size:16px}h3{font-size:18px}a{color:var(--teal)}header{display:flex;align-items:center;gap:20px;padding:18px 30px;background:white;border-bottom:1px solid var(--line)}.brand{font-weight:650;text-decoration:none;color:var(--ink);display:flex;gap:12px;align-items:center;margin-right:auto}.brand-icon{display:inline-grid;place-items:center;width:34px;height:34px;background:var(--ink);color:#a8dfce;border-radius:8px;font-size:26px}.offline{color:var(--teal);font-size:12px}header button{font-size:12px}main{max-width:1460px;margin:auto;padding:28px 30px}.intro{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.intro>div>p:last-child{color:var(--muted)}.eyebrow{font-size:11px;letter-spacing:1px;color:var(--teal)}.chapter{border-left:1px solid #c6d8d5;padding-left:30px;font:12px Consolas;color:var(--muted)}.chapter strong{display:block;font-size:48px;font-weight:400;color:#8baaa5}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}.tabs button{display:flex;align-items:center;gap:15px;text-align:left;padding:15px 20px;border-radius:10px}.tabs button>span{font:17px Consolas;color:#829e9c}.tabs b{display:block;font-size:16px}.tabs small{display:block;color:var(--muted)}.tabs button[aria-pressed=true]{background:#e4f2ed;border-color:#6ba99b;box-shadow:inset 0 3px var(--teal)}.workspace{display:grid;grid-template-columns:258px minmax(0,1fr);gap:20px}aside,.content{display:flex;flex-direction:column;gap:18px;min-width:0}.panel{background:#fff;border:1px solid var(--line);border-radius:11px;padding:22px;min-width:0}.scenario-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}.scenario-list button{text-align:left;font-size:13px;border-color:transparent;background:#f3f6f6}.scenario-list button[aria-pressed=true]{background:#e5f3ed;border-color:#91beb1;color:#176556}.prediction h2{font-size:15px;line-height:1.7;margin:10px 0 12px}.prediction button{display:block;width:100%;text-align:left;font-size:12px;margin-top:7px}.prediction button[aria-pressed=true]{border-color:var(--teal);background:#e9f4ef}.prediction p[role=status]{font-size:12px;padding-top:12px;color:var(--teal)}.takeaway p{font-size:13px;color:var(--muted);margin:12px 0}.takeaway button{font-size:12px;color:var(--teal);width:100%}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.section-head .eyebrow{margin-bottom:5px}.badge{font-size:11px;color:var(--muted);background:#eff4f4;padding:4px 8px;border-radius:5px}.config>p{color:var(--muted);font-size:13px}#config-form{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-top:17px}#rtos-options{display:flex;gap:12px;flex-wrap:wrap}label{font-size:11px;color:var(--muted)}label select{display:block;font-size:12px;margin-top:5px}#config-form>button{font-size:12px}.fine{font-size:11px;color:var(--muted);line-height:1.8}.controls{display:flex;gap:6px;flex-wrap:wrap}.controls button,.controls select{font-size:12px;padding:7px 10px}.primary{background:var(--teal);color:white;border-color:var(--teal)}.primary:hover{background:#096a6b}.scrubber{display:flex;align-items:center;gap:15px;margin:10px 0 18px;font:12px Consolas;color:var(--muted)}.scrubber>span{white-space:nowrap}.scrubber input{width:100%;min-width:0;accent-color:var(--teal)}#event{padding:18px;background:#edf6f2;border-left:3px solid var(--teal);border-radius:0 7px 7px 0;min-height:142px}#event-label{font:11px Consolas;color:var(--teal);margin-bottom:8px}#event-detail{font-size:13px;line-height:1.85;color:#486961;margin-top:8px}#result{border:1px solid #aacdba;background:#f1f8f1;padding:14px;border-radius:7px;margin-top:15px;font-size:13px}#result.warn{border-color:#dec8a5;background:#fff7ea}#result strong{display:block;margin-bottom:5px}#registers{display:grid;gap:10px}.register{display:grid;grid-template-columns:160px minmax(0,1fr) 110px;gap:12px;align-items:center;background:#f5f8f8;border:1px solid #e1eaea;border-radius:7px;padding:13px}.register b{font:13px Consolas}.register small{display:block;font-size:10px;color:var(--muted)}.register .value{font:15px Consolas;text-align:right;color:var(--teal)}.bits{display:flex;gap:4px;justify-content:center}.bit{background:#e5eded;border:1px solid #d5e2e1;border-radius:4px;min-width:25px;text-align:center;font:14px/25px Consolas}.bit.on{background:#c7e6da;border-color:#81b59e;color:#195a45}.bit small{font:8px/12px Consolas;color:#76918c}.reg-desc{grid-column:1/-1;color:var(--muted);font-size:11px}.signal-path{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.signal{padding:10px 12px;background:#f0f4f5;border:1px solid #e1e9ea;border-radius:6px;flex:1 1 130px;font-size:12px}.signal span{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}.signal.active{background:#e7f3ed;border-color:#9fc8b8}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:12px}.h{color:#16776f}.m{color:#a77624}.l{color:#5479a1}.isr{color:#925e9d}.timeline-scroll{overflow-x:auto;max-width:100%;padding-bottom:10px}#timeline{display:flex;gap:4px;min-width:max-content}#timeline button{font:12px Consolas;width:37px;min-height:50px;padding:7px 2px;border-radius:5px}#timeline button small{font:9px Consolas;display:block;margin-bottom:7px}#timeline .actor-H{background:#d8efe4;border-color:#99c9b2}#timeline .actor-M{background:#fbefcf;border-color:#d8c18e}#timeline .actor-L{background:#e5eef8;border-color:#a6bdd5}#timeline .actor-ISR{background:#f0e6f5;border-color:#c7afd3}#timeline .future{background:#f4f6f6;color:#a4b4b3;border-color:#e5ebeb}#timeline [aria-current=true]{outline:2px solid var(--teal);outline-offset:-2px}.table-scroll{overflow-x:auto;margin-top:17px}table{border-collapse:collapse;width:100%;font-size:12px;text-align:left}th{font-size:10px;color:var(--muted);font-weight:500;white-space:nowrap}th,td{padding:10px 8px;border-bottom:1px solid #e7eded}td:last-child{min-width:130px}.state{display:inline-block;padding:2px 7px;border-radius:4px;background:#f1f4f4;white-space:nowrap}.state.running{background:#d8efe4;color:#16776f}.state.blocked{background:#fff1d7;color:#9b6a21}.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;min-width:0}.code-panel{background:#19373d;border:1px solid #2b4d50;border-radius:10px;padding:20px;min-width:0;color:#c4e3d7}.code-panel h2{font-size:13px}.code-panel .section-head span{font-size:10px;color:#89b2aa}pre{font:12px/1.9 Consolas,"Microsoft YaHei",monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}#code{min-height:110px}#log{padding-left:21px;font-size:12px;color:var(--muted);max-height:180px;overflow-y:auto;margin:12px 0 0}#log li{padding:4px}#log li:last-child{color:var(--teal)}.sources{font-size:12px;color:var(--muted)}.sources summary{color:var(--ink);cursor:pointer;font-weight:600}.sources li{margin:9px 0}.sources a{display:block;margin-top:8px}.sources p{margin:14px 0}footer{font-size:11px;text-align:center;color:var(--muted);padding:25px 0 10px}#validation{color:#a23d36;margin-top:10px}[hidden]{display:none!important}@media(min-width:1250px){aside{position:sticky;top:18px;align-self:start}}@media(max-width:1000px){.workspace{grid-template-columns:220px minmax(0,1fr)}.panel{padding:17px}.details-grid{grid-template-columns:1fr}.register{grid-template-columns:1fr auto}.bits{justify-content:start;grid-column:1/-1;grid-row:2}.register .value{grid-column:2;grid-row:1}.chapter{display:none}}@media(max-width:720px){header{padding:13px 16px;gap:8px;flex-wrap:wrap}.offline{display:none}.brand{font-size:13px}main{padding:22px 14px}h1{font-size:25px}.intro p{font-size:12px}.workspace{grid-template-columns:1fr}.tabs{gap:8px}.tabs button{padding:12px 10px;gap:8px}.tabs b{font-size:14px}.tabs small{font-size:10px}.scenario-list{display:grid;grid-template-columns:1fr 1fr}.prediction,.takeaway{padding:16px}.prediction h2{margin:8px 0}.prediction #quiz-options{display:flex;gap:8px;flex-wrap:wrap}.prediction button{width:auto;flex:1 1 120px}.controls{width:100%}.controls button{flex:1}.signal{flex:1 1 120px}.badge{display:none}.bits{gap:5px}.bit{flex:1;min-width:20px}.register{gap:8px}.scrubber{gap:8px}.section-head .fine{max-width:100%}}
+</style></head>
+<body>
+<header><a class="brand" href="../学习导航.html"><span class="brand-icon">▦</span>嵌入式学习实验室</a><span class="offline">● 离线运行 · 无需板卡</span><button id="export">导出实验记录</button></header>
+<main>
+<section class="intro"><div><p class="eyebrow">PS SOFTWARE / 从硬件事件到任务执行</p><h1>谁改了状态，谁获得 CPU？</h1><p>先预测，再单步验证。把寄存器、中断和任务调度连接起来。</p></div><div class="chapter">LAB <strong>05</strong></div></section>
+<nav class="tabs" aria-label="实验类别"><button data-kind="registers" aria-pressed="true"><span>01</span><div><b>寄存器与中断</b><small>写一个数，硬件发生什么</small></div></button><button data-kind="rtos" aria-pressed="false"><span>02</span><div><b>RTOS 任务调度</b><small>就绪、阻塞与优先级</small></div></button></nav>
+<div class="workspace">
+<aside>
+<section class="panel"><p class="eyebrow">选择一组实验</p><div id="scenarios" class="scenario-list"></div></section>
+<section class="panel prediction"><p class="eyebrow">先想一下</p><h2 id="quiz-question"></h2><div id="quiz-options"></div><p id="quiz-answer" role="status" hidden></p></section>
+<section class="panel takeaway"><h2>带着这个问题观察</h2><p id="takeaway"></p><button id="compare">切换对照场景 →</button></section>
+</aside>
+<div class="content">
+<section class="panel config"><div class="section-head"><div><p class="eyebrow" id="kind-label"></p><h2 id="title"></h2></div><span class="badge">可重放的逻辑模型</span></div><p id="description"></p>
+<form id="config-form"><div id="rtos-options" hidden><label>采集任务每轮工作量<select id="work"><option value="1">1 个时间单位</option><option value="2" selected>2 个时间单位</option><option value="3">3 个时间单位</option><option value="4">4 个时间单位</option></select></label><label>观察窗口<select id="horizon"><option value="12">12 个时间单位</option><option value="18" selected>18 个时间单位</option><option value="30">30 个时间单位</option><option value="36">36 个时间单位</option></select></label></div><button type="submit">生成 / 重置</button><span id="dirty" class="fine"></span></form><p id="validation" role="alert" hidden></p></section>
+<section class="panel playback"><div class="section-head"><h2>跟随每一次状态变化</h2><div class="controls"><button id="previous">上一步</button><button id="play" class="primary">播放</button><button id="next">下一步</button><button id="finish">到结果</button><select id="speed" aria-label="播放速度"><option value="1100">慢速</option><option value="650" selected>中速</option><option value="150">快速</option></select></div></div>
+<div class="scrubber"><span id="position"></span><input id="seek" type="range" min="0" value="0" aria-label="实验进度"></div>
+<article id="event" aria-live="polite"><p id="event-label"></p><h3 id="event-title"></h3><p id="event-detail"></p></article>
+<div id="result" hidden></div>
+</section>
+<section id="register-view" class="panel"><div class="section-head"><h2>寄存器快照</h2><span class="fine">偏移属于虚拟外设；位格展示低 8 位</span></div><div id="registers"></div><div class="signal-path" id="signals"></div><p class="fine">RW：普通读写 · RO：只读 · W1C：写入的 1 清除对应位，0 保持。DONE = bit 0，ERROR = bit 1。</p></section>
+<section id="scheduler-view" class="panel" hidden><div class="section-head"><h2>调度事件时间线</h2><span class="fine">点击已发生的格子回看；浅灰格子尚未发生</span></div><div class="legend"><span class="h">H 高优先级</span><span class="m">M 中优先级</span><span class="l">L 低优先级</span><span class="isr">ISR 中断</span><span>— 空闲 / 初态</span></div><div class="timeline-scroll"><div id="timeline"></div></div><p class="fine">每格是一条事件，格子宽度不表示耗时。时间为离散教学单位。运行区间步骤显示区间开始时的状态；其他步骤显示动作后的状态。时间线标明执行者。中断可能与任务处于同一时间单位，详见事件说明。</p><div class="table-scroll"><table><thead><tr><th>任务</th><th>基础 → 有效优先级</th><th>状态</th><th>等待 / 工作</th></tr></thead><tbody id="tasks"></tbody></table></div><div id="scheduler-status" class="signal-path"></div></section>
+<div class="details-grid"><section class="code-panel"><div class="section-head"><h2>这一刻的操作</h2><span>概念代码 · 非板卡程序</span></div><pre id="code"></pre></section><section class="panel"><h2>已发生的事件</h2><ol id="log"></ol></section></div>
+<details class="panel sources"><summary>模型假设、上板区别与官方资料</summary><ul id="limits"></ul><p>真实 Linux 驱动使用 MMIO/DMA 等内核接口；裸机或 RTOS 使用对应 BSP。这里的伪代码不提供可直接写入板卡的地址。volatile 不保证原子性、访问顺序或 DMA 缓存一致性。</p><a href="https://kernel.org/doc/html/next/driver-api/device-io.html" target="_blank" rel="noreferrer">Linux：MMIO 与寄存器访问</a><a href="https://github.freertos.org/Documentation/02-Kernel/02-Kernel-features/01-Tasks-and-co-routines/04-Task-scheduling" target="_blank" rel="noreferrer">FreeRTOS：任务调度</a><a href="https://freertos.org/Real-time-embedded-RTOS-mutexes.html" target="_blank" rel="noreferrer">FreeRTOS：互斥锁与优先级继承</a></details>
+</div></div>
+<footer>模型用于解释逻辑关系，不执行硬件操作，也不模拟真实 FreeRTOS 内核。可双击同目录“RTOS与寄存器实验室.html”独立使用。</footer>
+</main><script>/* Virtual MMIO model: offsets and behavior are teaching contracts, not a real BSP.
+ * Reference: https://docs.kernel.org/driver-api/device-io.html
+ * The controller completion step abstracts GIC EOI; EOI is not peripheral W1C.
+ */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.RegisterLab = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const DONE = 1, ERROR = 2, ENABLE = 1;
+  const definition = [
+    { name: 'CONTROL', offset: '0x00', access: 'RW', description: 'bit 0：启用虚拟设备；其余位保留。' },
+    { name: 'DEVICE_ID', offset: '0x04', access: 'RO', description: '固定器件标识 0x53545544；本虚拟设备忽略写入。' },
+    { name: 'IRQ_STATUS', offset: '0x08', access: 'W1C', description: 'bit 0 DONE、bit 1 ERROR；事件锁存，写 1 清对应位，写 0 不变。' },
+    { name: 'IRQ_ENABLE', offset: '0x0C', access: 'RW', description: 'bit 0、1 分别允许 DONE、ERROR 驱动电平中断线；不清除状态。' }
+  ];
+  function uint32(value) {
+    if (!Number.isInteger(value) || value < 0 || value > 0xffffffff) throw new RangeError('寄存器值必须是 0 到 0xFFFFFFFF 的整数');
+    return value >>> 0;
+  }
+  class Device {
+    constructor() {
+      this.values = { CONTROL: 0, DEVICE_ID: 0x53545544, IRQ_STATUS: 0, IRQ_ENABLE: 0 };
+      this.inIsr = false;
+      this.controllerActive = false;
+      this.taskState = 'blocked';
+      this.notifications = 0;
+      this.handled = 0;
+      this.lostError = false;
+      this.irqEntries = 0;
+      this.recordedEvents = 0;
+    }
+    check(name) {
+      if (!Object.prototype.hasOwnProperty.call(this.values, name)) throw new RangeError('未知寄存器：' + name);
+    }
+    read(name) {
+      this.check(name);
+      return this.values[name] >>> 0;
+    }
+    write(name, value) {
+      this.check(name);
+      value = uint32(value);
+      if (name === 'DEVICE_ID') return this.read(name);
+      if (name === 'IRQ_STATUS') {
+        const cleared = this.values.IRQ_STATUS & value & 3;
+        if ((cleared & ERROR) && !(this.recordedEvents & ERROR)) this.lostError = true;
+        this.values.IRQ_STATUS &= ~(value & 3);
+      } else {
+        this.values[name] = value & (name === 'CONTROL' ? ENABLE : 3);
+      }
+      return this.read(name);
+    }
+    raise(bits) {
+      bits = uint32(bits) & 3;
+      if (!(this.values.CONTROL & ENABLE)) return false;
+      this.values.IRQ_STATUS |= bits;
+      // A new event is not yet recorded by software, even if an older one was.
+      this.recordedEvents &= ~bits;
+      return true;
+    }
+    record(bits) {
+      this.recordedEvents |= uint32(bits) & this.values.IRQ_STATUS & 3;
+    }
+    get irqLine() {
+      return (this.values.IRQ_STATUS & this.values.IRQ_ENABLE & 3) !== 0;
+    }
+    enterInterrupt() {
+      if (!this.irqLine || this.inIsr || this.controllerActive) return false;
+      this.inIsr = true;
+      this.controllerActive = true;
+      this.irqEntries++;
+      return true;
+    }
+    controllerComplete() {
+      if (!this.inIsr || !this.controllerActive) throw new Error('只有已进入的中断才能完成控制器确认');
+      this.controllerActive = false;
+    }
+    exitInterrupt() {
+      if (!this.inIsr || this.controllerActive) throw new Error('返回前需要完成控制器确认');
+      this.inIsr = false;
+    }
+    notify() {
+      if (!this.inIsr) throw new Error('此实验只从 ISR 发送任务通知');
+      this.notifications++;
+      this.taskState = 'ready';
+    }
+    takeNotification() {
+      if (this.inIsr || this.notifications === 0) return false;
+      this.notifications--;
+      this.taskState = 'running';
+      this.handled++;
+      return true;
+    }
+    blockTask() {
+      if (this.notifications !== 0) throw new Error('仍有通知时不能在此模型中阻塞');
+      this.taskState = 'blocked';
+    }
+    snapshot(time) {
+      return {
+        time,
+        registers: definition.map(item => Object.assign({}, item, { value: this.read(item.name) })),
+        irqLine: this.irqLine,
+        irqEnabled: this.values.IRQ_ENABLE !== 0,
+        inIsr: this.inIsr,
+        controllerActive: this.controllerActive,
+        taskState: this.taskState,
+        notifications: this.notifications,
+        handled: this.handled,
+        lostError: this.lostError,
+        irqEntries: this.irqEntries,
+        recordedEvents: this.recordedEvents
+      };
+    }
+  }
+
+  const scenarios = [
+    { id: 'irq-normal', title: '正常中断 → 唤醒任务', description: '完成事件被锁存，ISR 记录并清源，再通知任务处理。' },
+    { id: 'irq-uncleared', title: '忘记清源 → 反复进入 ISR', description: '比较外设状态清除与中断控制器 EOI；后者不会清掉前者。' },
+    { id: 'irq-masked', title: '中断被屏蔽，事件还在吗？', description: '先屏蔽中断、产生事件，再解除屏蔽，观察锁存状态。' },
+    { id: 'w1c-correct', title: 'W1C：只清 DONE', description: '写入 0x01，保留尚未处理的 ERROR。' },
+    { id: 'w1c-rmw', title: 'W1C：读改写误清 ERROR', description: '状态为 0x03 时执行 status |= DONE，会写回什么？' },
+    { id: 'ro-write', title: 'RO：写入不等于生效', description: '比较普通 RW 控制位与只读 DEVICE_ID。' }
+  ];
+  const limits = [
+    '虚构外设与寄存器偏移，仅用于理解语义，不能用于真实板卡。RO 写入被忽略是本模型约定，实际器件也可能报错。',
+    'IRQ_STATUS 采用锁存、写 1 清除，IRQ_ENABLE 只屏蔽输出；CONTROL 仅控制新事件的产生，不负责复位或清除旧事件。这些规则都须以实际手册为准。',
+    '中断为电平触发，单核、无嵌套。控制器完成是 EOI 的抽象，不模拟 GIC 的全部 pending/active 状态、优先级、屏障或真实时延。',
+    '清源、EOI、通知与 ISR 返回按一种教学顺序展示；真实 BSP/RTOS 可能由中断封装层处理 EOI，顺序与屏障要求依平台而定。',
+    'lostError 表示清除了本示例软件尚未记录的 ERROR。真实硬件不提供这个“上帝视角”标志；读出状态也不自动代表业务已处理。',
+    '每步是一项逻辑事件，不是 CPU 周期。volatile 不能替代访问器、内存屏障、缓存维护或多任务同步。'
+  ];
+
+  function run(options) {
+    options = options || {};
+    const id = options.scenario === undefined ? 'irq-normal' : options.scenario;
+    const scenario = scenarios.find(item => item.id === id);
+    if (!scenario) throw new RangeError('未知寄存器场景：' + id);
+    const device = new Device(), steps = [];
+    function step(title, detail, code, actor, action) {
+      if (action) action();
+      const tick = steps.length;
+      steps.push({ title, detail, code: code || '', actor: actor || 'CPU', tick, snapshot: device.snapshot(tick) });
+    }
+    function configure(mask) {
+      step('启用虚拟外设', 'CONTROL 为普通 RW：写入 bit 0 后，设备可以产生新事件。', 'mmio_write(CONTROL, ENABLE);', 'CPU', () => device.write('CONTROL', ENABLE));
+      step(mask ? '打开事件中断' : '暂时屏蔽事件中断', 'IRQ_ENABLE 只决定锁存事件能否驱动中断线，不改变 IRQ_STATUS。', 'mmio_write(IRQ_ENABLE, ' + (mask ? 'DONE | ERROR' : '0') + ');', 'CPU', () => device.write('IRQ_ENABLE', mask));
+    }
+    function enter() {
+      step('CPU 进入 ISR', '电平中断线有效且没有正在处理的 ISR，控制器交付中断。任务此刻仍未运行。', 'irq_handler(); // 由平台中断入口调用', 'ISR', () => {
+        if (!device.enterInterrupt()) throw new Error('场景中的中断尚未满足进入条件');
+      });
+    }
+    function eoi() {
+      step('完成中断控制器确认', '平台封装层完成 EOI 的抽象操作。它结束控制器的 active 状态，不会替外设清除 IRQ_STATUS。', 'platform_irq_complete(); // 抽象 EOI', 'ISR', () => device.controllerComplete());
+    }
+    function exit() {
+      step('从 ISR 返回', '退出中断上下文。随后才能调度普通任务；若源仍有效，仍可能再次进入 ISR。', 'return_from_irq();', 'ISR', () => device.exitInterrupt());
+    }
+    step('复位后的虚拟设备', '先预测结果，再单步观察。蓝图中的偏移是教学设定，不是 Zynq 实际地址。', '// 任务阻塞等待通知', 'idle');
+    let result;
+
+    if (id === 'irq-normal') {
+      configure(3);
+      step('设备产生 DONE', '设备把 DONE 锁存到 IRQ_STATUS。对应使能位为 1，中断线变为有效。', '// 硬件事件：IRQ_STATUS |= DONE', 'DEVICE', () => device.raise(DONE));
+      enter();
+      let status = 0;
+      step('读取并记录原因', '读取不会清除状态。先把原因记录下来，之后清除才不会失去本次事件信息。', 'status = mmio_read(IRQ_STATUS);\nrecord_events(status);', 'ISR', () => { status = device.read('IRQ_STATUS'); device.record(status); });
+      step('向 W1C 写入已确认的位', '写 1 清 DONE，写 0 保留其他位。外设中断线此时撤销，但 CPU 仍在 ISR 内。', 'mmio_write(IRQ_STATUS, status & DONE);', 'ISR', () => device.write('IRQ_STATUS', status & DONE));
+      eoi();
+      step('ISR 通知处理任务', '任务从阻塞变为就绪。通知成功不等于任务已经执行；CPU 还没有退出 ISR。', 'notify_task_from_isr(); // 对应平台允许的 ISR API', 'ISR', () => device.notify());
+      exit();
+      step('任务取得通知并处理', '本例没有其他更高优先级就绪任务，处理任务运行，消费一个通知并处理结果。', 'take_notification();\nprocess_result();', 'TASK', () => device.takeNotification());
+      step('任务重新等待', '处理完成后阻塞，等待下一次事件，而不是占用 CPU 忙等。', 'wait_for_next_notification();', 'TASK', () => device.blockTask());
+      result = { title: '一次事件，一次处理', detail: 'DONE 已清除，中断线撤销；通知被消费，任务处理 1 次后再次阻塞。', tone: 'good' };
+    } else if (id === 'irq-uncleared') {
+      configure(3);
+      step('设备产生 DONE', '状态锁存并拉起电平中断线。', '// 硬件产生 DONE', 'DEVICE', () => device.raise(DONE));
+      for (let i = 0; i < 3; i++) {
+        enter();
+        step('读取了状态，但没有清源', '这次 ISR 只读取状态。读取本模型的 W1C 寄存器没有清除副作用。', 'status = mmio_read(IRQ_STATUS);\n// 缺少 mmio_write(IRQ_STATUS, DONE);', 'ISR', () => device.read('IRQ_STATUS'));
+        eoi();
+        exit();
+      }
+      step('仍有待处理中断', '已演示三次 ISR 进入，DONE 和中断线仍有效。为便于观察，动画在此停止；问题没有自行消失。', '// IRQ_STATUS == DONE；IRQ line 仍有效', 'idle');
+      result = { title: 'EOI 不能代替外设清源', detail: '仅完成控制器确认，电平源仍然有效，ISR 会反复进入。本例未通知任务。', tone: 'warn' };
+    } else if (id === 'irq-masked') {
+      configure(0);
+      step('设备产生 DONE，但线没有拉起', 'IRQ_STATUS 已记录 DONE。使能掩码为 0，因此不向控制器提出中断请求。', '// 硬件产生 DONE；IRQ_ENABLE == 0', 'DEVICE', () => device.raise(DONE));
+      step('CPU 暂时没有进入 ISR', '没有 ISR 不代表没有事件；可以看到状态位仍为 1，任务仍在等待。', '// 检查：暂不满足中断进入条件', 'CPU', () => {
+        if (device.enterInterrupt()) throw new Error('屏蔽时不应进入中断');
+      });
+      step('解除 DONE 屏蔽', '不需要再产生一次事件；旧的锁存 DONE 与新掩码组合，使中断线立即有效。', 'mmio_write(IRQ_ENABLE, DONE);', 'CPU', () => device.write('IRQ_ENABLE', DONE));
+      enter();
+      step('记录并清除旧事件', '解除屏蔽后可处理先前的 DONE。屏蔽和清除是两件事。', 'record_events(mmio_read(IRQ_STATUS));\nmmio_write(IRQ_STATUS, DONE);', 'ISR', () => { device.record(device.read('IRQ_STATUS')); device.write('IRQ_STATUS', DONE); });
+      eoi();
+      step('发送任务通知', '处理任务变为就绪，等待 ISR 返回。', 'notify_task_from_isr();', 'ISR', () => device.notify());
+      exit();
+      step('任务处理先前的事件', '事件在被屏蔽期间没有丢失，但处理延迟了。', 'take_notification();\nprocess_result();', 'TASK', () => device.takeNotification());
+      result = { title: '屏蔽中断不等于清除事件', detail: '本模型的状态会锁存；解除使能屏蔽后，旧事件仍可触发中断。', tone: 'good' };
+    } else if (id === 'w1c-correct' || id === 'w1c-rmw') {
+      configure(0);
+      step('DONE 和 ERROR 同时置位', '当前 IRQ_STATUS = 0x03。本实验使用轮询，不启用中断。目标是只确认 DONE，保留 ERROR 供后续处理。', '// 硬件产生 DONE | ERROR', 'DEVICE', () => device.raise(DONE | ERROR));
+      if (id === 'w1c-correct') {
+        step('记录 DONE 并只写入 0x01', '写 DONE 对应的 1 清除 DONE；ERROR 对应写 0，因此 ERROR 保持为 1。', 'record_events(DONE);\nmmio_write(IRQ_STATUS, DONE);', 'CPU', () => { device.record(DONE); device.write('IRQ_STATUS', DONE); });
+        step('读取剩余 ERROR', '现在 IRQ_STATUS = 0x02，未处理的 ERROR 仍可被软件发现。', 'pending = mmio_read(IRQ_STATUS); // 0x02', 'CPU', () => device.read('IRQ_STATUS'));
+        result = { title: '只清除了指定事件', detail: 'DONE 清零，ERROR 保留；下一步应按业务要求记录并处理 ERROR。', tone: 'good' };
+      } else {
+        let readValue = 0;
+        step('读改写：先读到 0x03', '程序打算确认 DONE，却把整个状态值读出来作为即将写回的基础。此例没有记录 ERROR。', 'temp = mmio_read(IRQ_STATUS); // 0x03', 'CPU', () => { readValue = device.read('IRQ_STATUS'); device.record(DONE); });
+        step('与 DONE 做按位或，仍是 0x03', '0x03 | 0x01 = 0x03。普通变量中的“置位”，在这里将变成向两个状态位都写 1。', 'temp |= DONE; // 0x03', 'CPU', () => { readValue |= DONE; });
+        step('写回 0x03，两个位都被清除', 'W1C 将 DONE 和 ERROR 同时清零，软件没有保留的 ERROR 信息因此丢失。', 'mmio_write(IRQ_STATUS, temp); // 写 0x03', 'CPU', () => device.write('IRQ_STATUS', readValue));
+        result = { title: '读改写误清了 ERROR', detail: 'IRQ_STATUS 从 0x03 变成 0。不要默认对 W1C 寄存器使用 |=；应根据手册写入需要确认的位掩码。', tone: 'warn' };
+      }
+    } else {
+      step('读取只读 ID', 'DEVICE_ID = 0x53545544。寄存器属性决定写入是否允许或有意义。', 'id = mmio_read(DEVICE_ID);', 'CPU', () => device.read('DEVICE_ID'));
+      step('尝试写入 DEVICE_ID', '此虚拟器件忽略 RO 写入，ID 没有改变。真实硬件的处理方式必须查手册。', 'mmio_write(DEVICE_ID, 0); // 本模型忽略', 'CPU', () => device.write('DEVICE_ID', 0));
+      step('写入普通 RW 控制位', 'CONTROL 的 bit 0 是可写位，写入 1 后保存为 1。', 'mmio_write(CONTROL, ENABLE);', 'CPU', () => device.write('CONTROL', ENABLE));
+      step('清除普通 RW 控制位', 'CONTROL 与 W1C 状态寄存器不同：向 CONTROL 写 0 使 enable 变为 0。', 'mmio_write(CONTROL, 0);', 'CPU', () => device.write('CONTROL', 0));
+      result = { title: '访问属性决定操作含义', detail: '同样是写 0，RW 可保存为 0、RO 可忽略、W1C 则保留原状态。此处采用明确的虚拟硬件约定。', tone: 'good' };
+    }
+    return { kind: 'registers', title: scenario.title, description: scenario.description, config: { scenario: id }, steps, result, limits: limits.slice() };
+  }
+  return { Device, DONE, ERROR, ENABLE, scenarios, run };
+});
+</script><script>/* Single-core teaching scheduler, not FreeRTOS execution or measured hardware timing.
+ * References: https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/01-Tasks-and-co-routines/04-Task-scheduling
+ * https://www.freertos.org/Real-time-embedded-RTOS-mutexes.html
+ */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.SchedulerLab = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const scenarios = [
+    {id:'blocking',title:'等待通知：让出 CPU',description:'采集任务阻塞等待；外部事件在第 6 拍触发中断，唤醒采集任务。'},
+    {id:'busy-wait',title:'忙等：占住 CPU',description:'同样等待第 6 拍的外部事件，但采集任务始终保持就绪，持续查询。'},
+    {id:'inversion',title:'优先级反转',description:'用无继承的二值信号量充当锁：低优先级任务持锁，高优先级任务等锁，中优先级任务延迟释放锁。'},
+    {id:'inheritance',title:'优先级继承',description:'改用具备优先级继承的互斥锁，对比低优先级持锁任务的临时提权与恢复。'},
+    {id:'periodic-relative',title:'相对延时：周期逐渐偏移',description:'每轮工作结束后再等待 5 拍；执行时间也会计入相邻两轮的间隔。'},
+    {id:'periodic-absolute',title:'固定周期：按计划唤醒',description:'按 0、5、10… 的计划释放采集任务；本模型每轮工作少于 5 拍。'}
+  ].map(Object.freeze);
+  Object.freeze(scenarios);
+  const limits = [
+    '单核、固定优先级、抢占式教学模型：数字越大，优先级越高；不模拟 SMP、相同优先级时间片和调度开销。',
+    '“拍”是逻辑时间单位。浏览器播放速度只影响观看速度，不代表 RTOS tick 时长、CPU 频率或真实中断延迟。',
+    '同一拍可以有多个瞬时边界事件。标为运行区间的步骤才消耗 1 拍；状态是该步骤执行时可观察的快照。',
+    '通知场景只有一次外部 IRQ（t=6），使用计数式通知并在任务取得通知时消耗一次；不是完整 FreeRTOS 移植。',
+    '无继承组模拟用二值信号量承担互斥；继承组模拟 FreeRTOS mutex。不是关闭 FreeRTOS mutex 的继承开关。只有一把锁和一个等待者，无嵌套锁、超时或链式继承。',
+    '周期场景每轮执行 1–4 拍、周期 5 拍且没有更高优先级任务，因此绝对周期实验不包含过载或截止时间错失。'
+  ];
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function configuration(options) {
+    if (options === undefined) options = {};
+    if (!options || typeof options !== 'object' || Array.isArray(options)) throw new TypeError('参数必须是对象');
+    const config = {
+      scenario:options.scenario === undefined ? 'blocking' : options.scenario,
+      workTicks:options.workTicks === undefined ? 2 : options.workTicks,
+      horizon:options.horizon === undefined ? 18 : options.horizon
+    };
+    if (!scenarios.some(item=>item.id===config.scenario)) throw new RangeError('未知调度场景');
+    if (!Number.isInteger(config.workTicks)||config.workTicks<1||config.workTicks>4) throw new RangeError('采集任务每轮工作量必须是 1–4 拍的整数');
+    if (!Number.isInteger(config.horizon)||config.horizon<12||config.horizon>36) throw new RangeError('观察窗口必须是 12–36 拍的整数');
+    return config;
+  }
+  function task(id,name,priority,remaining,state,note) {
+    return {id,name,basePriority:priority,effectivePriority:priority,remaining,state:state||'ready',note:note||'',phase:'work'};
+  }
+  function simulate(config) {
+    const isWait = ['blocking','busy-wait'].includes(config.scenario);
+    const isMutex = ['inversion','inheritance'].includes(config.scenario);
+    const isPeriodic = config.scenario.startsWith('periodic-');
+    const inherit = config.scenario === 'inheritance';
+    const tasks = [
+      task('H','采集任务',3,config.workTicks),
+      task('M','通信任务',2,isPeriodic?4:8),
+      task('L','日志任务',1,isMutex?4:(isPeriodic?config.horizon:4))
+    ];
+    const H=tasks[0],M=tasks[1],L=tasks[2];
+    const state={tasks,time:0,owner:null,notifications:0,steps:[],metrics:{
+      work:{H:0,M:0,L:0},busyTicks:0,irqCount:0,highBlockedAt:null,highAcquiredAt:null,
+      highWaitTicks:0,periodicStarts:[],period:5
+    }};
+    if(isWait){H.phase='wait';H.note='等待 t=6 的外部完成事件';}
+    if(isMutex){
+      state.owner='L';
+      L.note='开始观察前已持有互斥锁，临界区还需 4 拍';
+      H.state='blocked';H.note='尚未到任务释放时刻 t=1';H.phase='acquire';
+      M.state='blocked';M.note='尚未到任务释放时刻 t=2';
+    }
+    if(isPeriodic){H.phase='periodic';H.nextRelease=0;H.cycleStarted=false;}
+    function emit(actor,event,title,detail,code,duration) {
+      const running = duration ? actor : (actor==='ISR'?'ISR':'');
+      const observed = tasks.map(t=>({
+        id:t.id,name:t.name,basePriority:t.basePriority,effectivePriority:t.effectivePriority,
+        state:running===t.id?'running':t.state,note:t.note
+      }));
+      state.steps.push({actor,tick:state.time,event,duration:duration||0,title,detail,code:code||'',
+        snapshot:{time:state.time,running,tasks:observed,mutex:{owner:state.owner},
+          notifications:state.notifications,metrics:clone(state.metrics)}});
+    }
+    function pick() {
+      return tasks.filter(t=>t.state==='ready').sort((a,b)=>b.effectivePriority-a.effectivePriority||a.id.localeCompare(b.id))[0];
+    }
+    function advanceWork(t) {
+      t.remaining--;
+      state.metrics.work[t.id]++;
+      state.time++;
+      if(t.remaining>0) return;
+      if(isPeriodic&&t===H){
+        H.state='blocked';H.cycleStarted=false;
+        H.nextRelease=config.scenario==='periodic-relative'?state.time+5:H.nextRelease+5;
+        H.note='本轮结束；等待计划时刻 t='+H.nextRelease;
+        emit('H','delay','采集任务进入延时',
+          (config.scenario==='periodic-relative'?'从本轮结束时刻起再等待 5 拍。':'下一次唤醒沿用固定 5 拍周期的时间基准。')+
+          ' 下一次就绪时刻为 t='+H.nextRelease+'；进入阻塞态后其他任务可运行。',
+          config.scenario==='periodic-relative'?'vTaskDelay(period);':'vTaskDelayUntil(&lastWake, period);',0);
+      }else{
+        t.state='done';t.note='本次示例工作已完成';
+        if(isMutex&&state.owner===t.id){
+          state.owner=null;t.effectivePriority=t.basePriority;
+          if(t===L&&H.phase==='acquire'){H.state='ready';H.note='锁已释放，等待调度后重新取得锁';}
+          emit(t.id,'unlock',t.name+'释放互斥锁',
+            '互斥锁变为空闲；等待者可以变为就绪，但只有取得 CPU 后才继续。持锁任务恢复基础优先级。',
+            inherit?'xSemaphoreGive(mutex);':'xSemaphoreGive(binaryGate);',0);
+        }
+        emit(t.id,'complete',t.name+'完成',
+          '本次有限实验中的工作已结束。done 表示结束本次示例，不是 FreeRTOS 的标准任务状态名称。',
+          '/* 本次工作结束 */',0);
+      }
+    }
+    emit('idle','initial','观察初始状态',
+      isMutex?'低优先级任务已持锁。H 在 t=1 就绪，M 在 t=2 就绪；只比较这一个锁的调度结果。':
+      isWait?'H 优先级 3，M 为 2，L 为 1；外部 IRQ 固定在 t=6 到达。':
+      'H 每轮工作 '+config.workTicks+' 拍，目标周期为 5 拍；M、L 在空闲期间处理后台工作。',
+      '/* 先看任务优先级与状态，再单步 */',0);
+    while(state.time<config.horizon){
+      const now=state.time;
+      if(isWait&&now===6&&state.metrics.irqCount===0){
+        state.notifications++;state.metrics.irqCount++;
+        if(H.state==='blocked'){H.state='ready';H.note='IRQ 已到达，等待运行并取得通知';}
+        emit('ISR','irq','外部完成中断到达',
+          'ISR 增加通知计数，并使等待通知的任务就绪。中断退出后按最高就绪优先级调度；不是等到下一个时间片才允许切换。',
+          'vTaskNotifyGiveFromISR(task, &higherPriorityWoken);\nportYIELD_FROM_ISR(higherPriorityWoken);',0);
+      }
+      if(isMutex&&now===1&&H.state==='blocked'&&H.note.includes('释放')){
+        H.state='ready';H.note='开始工作，首先需要取得互斥锁';
+        emit('H','release','高优先级采集任务就绪','H 在 t=1 被释放，优先级 3，先尝试获取 L 持有的锁。','/* 任务释放 */',0);
+      }
+      if(isMutex&&now===2&&M.state==='blocked'){
+        M.state='ready';M.note='通信工作需要 8 拍，不使用这把锁';
+        emit('M','release','中优先级通信任务就绪','M 不依赖这把锁，因此可以正常参与优先级调度。','/* 任务释放 */',0);
+      }
+      if(isPeriodic&&H.state==='blocked'&&now>=H.nextRelease){
+        H.state='ready';H.remaining=config.workTicks;H.note='延时到期，等待调度';
+        emit('H','release','采集任务延时到期','达到 t='+H.nextRelease+'，采集任务从阻塞变为就绪。','/* 延时到期 */',0);
+      }
+      let selected=pick();
+      // Blocking calls and successful lock/notification acquisition are boundary events.
+      // Re-pick after each such operation so a blocked task can never consume a work quantum.
+      let boundaryCount=0;
+      while(selected&&boundaryCount++<4){
+        if(isWait&&selected===H&&H.phase==='wait'){
+          if(state.notifications>0){
+            state.notifications--;H.phase='work';H.note='已取得一次通知，开始处理数据';
+            emit('H','notify-take','采集任务取得通知','通知计数减少一次；随后执行数据处理。通知到达与处理完成是不同事件。',
+              config.scenario==='blocking'?'ulTaskNotifyTake(pdFALSE, portMAX_DELAY);':'ulTaskNotifyTake(pdFALSE, 0);',0);
+          }else if(config.scenario==='blocking'){
+            H.state='blocked';H.note='阻塞等待通知，不参与就绪任务竞争';
+            emit('H','block','采集任务阻塞等待','没有通知，H 让出 CPU。M 和 L 有机会在等待期间运行。',
+              'ulTaskNotifyTake(pdFALSE, portMAX_DELAY);',0);
+            selected=pick();continue;
+          }
+        }
+        if(isMutex&&selected===H&&H.phase==='acquire'){
+          if(state.owner===null){
+            state.owner='H';H.phase='work';H.note='已取得互斥锁，执行临界区';
+            state.metrics.highAcquiredAt=now;
+            state.metrics.highWaitTicks=now-state.metrics.highBlockedAt;
+            emit('H','lock','采集任务取得互斥锁','从 t='+state.metrics.highBlockedAt+' 等到 t='+now+
+              '，共等待 '+state.metrics.highWaitTicks+' 拍。',
+              inherit?'xSemaphoreTake(mutex, portMAX_DELAY);':'xSemaphoreTake(binaryGate, portMAX_DELAY);',0);
+          }else{
+            H.state='blocked';H.note='等待 L 释放互斥锁';state.metrics.highBlockedAt=now;
+            if(inherit){L.effectivePriority=H.effectivePriority;L.note='持锁期间继承 H 的优先级 3';}
+            emit('H','block','采集任务因互斥锁阻塞',
+              inherit?'L 的有效优先级临时升到 3，帮助它尽快运行并释放锁；H 本身仍然阻塞。':
+                'H 优先级很高，但锁仍归 L。H 阻塞后不能直接越过临界区。',
+              inherit?'xSemaphoreTake(mutex, portMAX_DELAY);':'xSemaphoreTake(binaryGate, portMAX_DELAY);',0);
+            selected=pick();continue;
+          }
+        }
+        break;
+      }
+      if(!selected){
+        emit('idle','idle','CPU 进入空闲','没有就绪的示例任务；本拍运行空闲任务。','/* idle task */',1);
+        state.time++;continue;
+      }
+      if(isWait&&selected===H&&H.phase==='wait'){
+        H.note='查询未完成，仍保持就绪';
+        emit('H','busy','采集任务忙等',
+          '运行区间 ['+now+', '+(now+1)+')：没有通知仍继续查询。M、L 虽然就绪，但优先级较低，无法运行。',
+          'while (ulTaskNotifyTake(pdFALSE, 0) == 0) { /* 不阻塞 */ }',1);
+        state.metrics.busyTicks++;state.time++;continue;
+      }
+      if(isPeriodic&&selected===H&&!H.cycleStarted){
+        H.cycleStarted=true;state.metrics.periodicStarts.push(now);
+      }
+      selected.note='本拍开始时剩余工作 '+selected.remaining+' 拍';
+      emit(selected.id,'work',selected.name+'运行',
+        '运行区间 ['+now+', '+(now+1)+')：'+selected.name+' 是当前最高优先级的就绪任务。'+
+        (selected.effectivePriority!==selected.basePriority?' 当前优先级 '+selected.effectivePriority+' 来自互斥锁继承。':''),
+        selected===H?'process_data_one_quantum();':selected===M?'service_communication_one_quantum();':'write_log_one_quantum();',1);
+      advanceWork(selected);
+    }
+    if(state.metrics.highBlockedAt!==null&&state.metrics.highAcquiredAt===null)
+      state.metrics.highWaitTicks=config.horizon-state.metrics.highBlockedAt;
+    emit('idle','end','到达观察窗口末尾',
+      '观察到 t='+config.horizon+'。尚未完成的任务继续保留真实模型状态；窗口结束不等于它们已完成。',
+      '/* 结束本次观察 */',0);
+    let result;
+    if(isWait){
+      const earlyWork=state.steps.filter(s=>s.event==='work'&&s.tick<6&&s.actor!=='H').length;
+      result={tone:config.scenario==='blocking'?'good':'warn',
+        title:config.scenario==='blocking'?'等待期间，其他任务可以运行':'忙等占用了等待期间的 CPU',
+        detail:'外部事件都在 t=6 到达。事件前，其他任务完成 '+earlyWork+' 拍工作；H 忙等 '+state.metrics.busyTicks+
+          ' 拍。通知已消耗 '+(state.metrics.irqCount-state.notifications)+' 次。忙等不会让外部事件提前。'};
+    }else if(isMutex){
+      const acquired=state.metrics.highAcquiredAt;
+      result={tone:inherit?'good':'warn',title:inherit?'继承帮助持锁者尽快释放锁':'中优先级任务延长了高优先级任务的等待',
+        detail:acquired===null?'窗口结束时 H 仍未取得锁；已等待 '+state.metrics.highWaitTicks+' 拍。':
+          'H 在 t='+state.metrics.highBlockedAt+' 等锁，在 t='+acquired+' 取得锁，共等待 '+state.metrics.highWaitTicks+
+          ' 拍。解锁后持锁任务恢复基础优先级。'};
+    }else{
+      const starts=state.metrics.periodicStarts;
+      const gaps=starts.slice(1).map((t,i)=>t-starts[i]);
+      result={tone:config.scenario==='periodic-absolute'?'good':'warn',
+        title:config.scenario==='periodic-absolute'?'按固定时间基准释放任务':'工作时间叠加进了相邻两轮间隔',
+        detail:'已开始的轮次：t='+starts.join('、')+'；相邻开始间隔：'+(gaps.length?gaps.join('、'):'尚无完整间隔')+
+          ' 拍。目标周期 5 拍，每轮执行 '+config.workTicks+' 拍。这里只比较无过载的情况。'};
+    }
+    return {kind:'rtos',title:scenarios.find(s=>s.id===config.scenario).title,
+      description:scenarios.find(s=>s.id===config.scenario).description,config,
+      steps:state.steps,result,limits:limits.slice()};
+  }
+  function run(options){return simulate(configuration(options));}
+  return Object.freeze({scenarios,run});
+});
+</script><script>(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const states = {running:'运行',ready:'就绪',blocked:'阻塞',done:'完成'};
+const pairs = {'irq-normal':'irq-uncleared','irq-uncleared':'irq-normal','irq-masked':'irq-normal','w1c-correct':'w1c-rmw','w1c-rmw':'w1c-correct','ro-write':'w1c-correct',blocking:'busy-wait','busy-wait':'blocking',inversion:'inheritance',inheritance:'inversion','periodic-relative':'periodic-absolute','periodic-absolute':'periodic-relative'};
+const questions = {
+ 'irq-normal':['外设完成以后，通知任务就等于任务已经执行了吗？',['是，通知就是直接调用任务','不是，任务还需要被调度'],1,'通知改变等待条件；能否立即运行还受 ISR 退出、优先级和调度条件影响。'],
+ 'irq-uncleared':['电平中断中，只完成控制器 EOI，会清掉外设状态吗？',['会，两者是同一个动作','不会，外设可能继续拉高中断线'],1,'本模型的 IRQ 来源是未清除的锁存状态。EOI 完成控制器处理，不替代外设清源。'],
+ 'irq-masked':['屏蔽中断后，设备完成状态还可能存在吗？',['可能，状态与屏蔽分别保存','不可能，屏蔽会清除状态'],0,'本模型只屏蔽信号输出，不清除状态；重新使能可能立即产生中断。'],
+ 'w1c-correct':['STATUS = 0b11，写入 0b01 后剩下什么？',['0b10，只清除 DONE','0b01，直接保存写入值'],0,'W1C 是写 1 清除，不是普通赋值。ERROR 位写入 0，因此保留。'],
+ 'w1c-rmw':['STATUS 为 3，读出后 OR 1 再写回，会发生什么？',['只清除 DONE','DONE 和 ERROR 都被清除'],1,'读出的 ERROR=1 也被写了回去，W1C 因而清掉它；本场景没有先记录该错误。'],
+ 'ro-write':['向本实验只读 ID 寄存器写入 0，会怎样？',['改变设备 ID','写入被忽略，ID 不变'],1,'这是本虚拟器件的约定。真实只读寄存器的非法写入效果必须查器件手册。'],
+ blocking:['高优先级任务阻塞等待通知时，低优先级任务能运行吗？',['能，如果它就绪且没有更高就绪任务','不能，高优先级永远占用 CPU'],0,'调度器在就绪任务中选择。阻塞任务不会因为优先级高就继续占用 CPU。'],
+ 'busy-wait':['高优先级任务不断轮询但不阻塞，会发生什么？',['低优先级任务自动轮流执行','在它保持就绪期间，低优先级任务可能无法运行'],1,'本模型是单核固定优先级抢占；外部 IRQ 仍能到来，但低优先级任务的进度受影响。'],
+ inversion:['高优先级 H 等低优先级 L 的锁，M 就绪，谁可能先执行？',['M，进一步推迟 L 释放锁','H，因为它优先级最高'],0,'H 已阻塞，不能执行。M 抢占 L，延长 H 的等待，就是这里的优先级反转。'],
+ inheritance:['优先级继承暂时提高谁的优先级？',['持锁的低优先级任务','等待锁的高优先级任务'],0,'提高持锁者，让它尽快完成临界区并释放锁；不代表等待者已经获得锁。'],
+ 'periodic-relative':['每轮执行 2 单位再延时 5 单位，下次开始距本次多远？',['5 单位','7 单位'],1,'相对延时从本轮工作结束时开始，因此工作时间也计入两次开始之间的间隔。'],
+ 'periodic-absolute':['周期 5、工作 2，按绝对周期释放时，理想开始时刻是什么？',['0、5、10……','0、7、14……'],0,'本模型无更高优先级干扰且工作短于周期。真实系统仍需分析抢占、抖动和超期。']
+};
+let kind='registers', scenario='irq-normal', run, cursor=0, timer=null;
+function model() { return kind==='rtos' ? SchedulerLab : RegisterLab; }
+function stop() { clearInterval(timer); timer=null; $('play').textContent='播放'; }
+function quiz() {
+ const q=questions[scenario];
+ $('quiz-question').textContent=q[0]; $('quiz-answer').hidden=true;
+ $('quiz-options').innerHTML=q[1].map((a,i)=>'<button type="button" data-answer="'+i+'" aria-pressed="false">'+escape(a)+'</button>').join('');
+ $('quiz-options').querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{
+   $('quiz-options').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+   $('quiz-answer').textContent=(Number(button.dataset.answer)===q[2]?'判断正确。':'再想一步：')+q[3]; $('quiz-answer').hidden=false;
+ }));
+ $('takeaway').textContent=q[3];
+}
+function build() {
+ stop();
+ try {
+   const next=model().run({scenario,...(kind==='rtos'?{workTicks:Number($('work').value),horizon:Number($('horizon').value)}:{})});
+   if (!next.steps.length) throw new Error('实验没有生成事件。');
+   run=next; cursor=0; $('validation').hidden=true; $('dirty').textContent='';
+ } catch(error) { $('validation').textContent=error.message; $('validation').hidden=false; return; }
+ $('title').textContent=run.title; $('description').textContent=run.description;
+ $('kind-label').textContent=kind==='rtos'?'调度实验 / 单核固定优先级':'寄存器实验 / 虚拟外设';
+ $('rtos-options').hidden=kind!=='rtos'; $('register-view').hidden=kind!=='registers'; $('scheduler-view').hidden=kind!=='rtos';
+ $('seek').max=run.steps.length-1;
+ $('limits').innerHTML=(run.limits||[]).map(x=>'<li>'+escape(x)+'</li>').join('');
+ document.querySelectorAll('[data-kind]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.kind===kind)));
+ $('scenarios').innerHTML=model().scenarios.map(s=>'<button type="button" data-scenario="'+escape(s.id)+'" aria-pressed="'+(s.id===scenario)+'">'+escape(s.title)+'</button>').join('');
+ $('scenarios').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{scenario=b.dataset.scenario;build();}));
+ $('compare').textContent='切换对照场景 →';
+ quiz(); render();
+}
+function signal(label,value,active=false) {return '<div class="signal'+(active?' active':'')+'"><span>'+escape(label)+'</span><b>'+escape(value)+'</b></div>';}
+function render() {
+ const step=run.steps[cursor], s=step.snapshot;
+ $('position').textContent=(cursor+1)+' / '+run.steps.length; $('seek').value=cursor;
+ $('previous').disabled=cursor===0; $('next').disabled=cursor===run.steps.length-1;
+ $('event-label').textContent=kind==='rtos'?'t = '+step.tick+' · '+(step.actor||'—'):'事件 '+cursor+' · '+(step.actor||'—');
+ $('event-title').textContent=step.title; $('event-detail').textContent=step.detail; $('code').textContent=step.code||'// 此步骤没有软件操作';
+ $('result').hidden=cursor!==run.steps.length-1;
+ $('result').className=run.result.tone==='warn'?'warn':'';
+ $('result').innerHTML='<strong>'+escape(run.result.title)+'</strong><p>'+escape(run.result.detail)+'</p>';
+ $('log').innerHTML=run.steps.slice(0,cursor+1).map((e,i)=>'<li>'+escape((kind==='rtos'?'t='+e.tick:'步骤 '+i)+' · '+e.title)+'</li>').join('');
+ $('log').scrollTop=$('log').scrollHeight;
+ if(kind==='registers'){
+   $('registers').innerHTML=s.registers.map(r=>{
+     const bits=Array.from({length:8},(_,i)=>7-i).map(b=>'<div class="bit'+((r.value>>>b)&1?' on':'')+'"><small>'+b+'</small>'+((r.value>>>b)&1)+'</div>').join('');
+     return '<div class="register"><div><b>'+escape(r.name)+'</b><small>偏移 '+escape(r.offset)+' · '+escape(r.access)+'</small></div><div class="bits" aria-label="'+escape(r.name)+' 的低八位">'+bits+'</div><code class="value">0x'+(r.value>>>0).toString(16).toUpperCase().padStart(8,'0')+'</code><p class="reg-desc">'+escape(r.description)+'</p></div>';
+   }).join('');
+   $('signals').innerHTML=signal('外设 IRQ 线',s.irqLine?'有效':'无效',s.irqLine)+signal('中断使能',s.irqEnabled?'已使能':'已屏蔽')+signal('处理上下文',s.inIsr?'正在 ISR':'非 ISR',s.inIsr)+signal('任务状态',states[s.taskState]||s.taskState)+signal('通知 / 已处理',s.notifications+' / '+s.handled)+signal('进入 ISR 次数',s.irqEntries);
+ } else {
+   $('timeline').innerHTML=run.steps.map((e,i)=>'<button class="'+(i>cursor?'future':'actor-'+e.actor)+'" data-step="'+i+'" aria-label="'+escape('步骤 '+i+'，t='+e.tick+'，'+(i>cursor?'尚未回放':e.title))+'" aria-current="'+(i===cursor)+'" '+(i>cursor?'disabled':'')+'><small>'+e.tick+'</small>'+(i>cursor?'·':escape(e.actor==='idle'?'—':e.actor))+'</button>').join('');
+   $('timeline').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{stop();cursor=Number(b.dataset.step);render();}));
+   $('tasks').innerHTML=s.tasks.map(t=>'<tr><td><b>'+escape(t.name)+'</b></td><td>'+t.basePriority+' → '+t.effectivePriority+'</td><td><span class="state '+escape(t.state)+'">'+escape(states[t.state]||t.state)+'</span></td><td>'+escape(t.note)+'</td></tr>').join('');
+   $('scheduler-status').innerHTML=signal('当前任务 / 上下文',s.running||'—')+signal('互斥锁持有者',s.mutex.owner||'无')+signal('待消费通知',s.notifications)+signal('逻辑时间',s.time);
+ }
+}
+$('config-form').addEventListener('submit',e=>{e.preventDefault();build();});
+for(const id of ['work','horizon']) $(id).addEventListener('change',()=>{$('dirty').textContent='参数已修改，点击生成后生效。';});
+document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.kind;scenario=kind==='rtos'?'blocking':'irq-normal';build();}));
+$('compare').addEventListener('click',()=>{scenario=pairs[scenario];build();});
+$('previous').addEventListener('click',()=>{stop();cursor=Math.max(0,cursor-1);render();});
+$('next').addEventListener('click',()=>{stop();cursor=Math.min(run.steps.length-1,cursor+1);render();});
+$('finish').addEventListener('click',()=>{stop();cursor=run.steps.length-1;render();});
+$('seek').addEventListener('input',()=>{stop();cursor=Number($('seek').value);render();});
+function play() {
+ if(timer){stop();return;}
+ if(cursor===run.steps.length-1){cursor=0;render();}
+ $('play').textContent='暂停';
+ timer=setInterval(()=>{cursor=Math.min(cursor+1,run.steps.length-1);render();if(cursor===run.steps.length-1)stop();},Number($('speed').value));
+}
+$('play').addEventListener('click',play);
+$('speed').addEventListener('change',()=>{if(timer){stop();play();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+$('export').addEventListener('click',()=>{
+ const data={format:'embedded-rtos-lab-v1',cursor,simulation:run};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+ const a=document.createElement('a');a.href=url;a.download=kind+'-'+scenario+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+build();
+})();
+</script>
+</body></html>

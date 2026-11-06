@@ -1,3 +1,14 @@
+# 嵌入式学习实验集
+
+双击 [学习导航.html](学习导航.html) 浏览全部实验。
+
+- [通信实验室](通信实验室.html)：CAN 与 UART 位流。
+- [总线实验室](can-end-to-end-lab/总线实验室.html)：CAN / SPI / I²C / UART 全链路。
+- [嵌入式系统实验室](embedded-system-lab/嵌入式系统实验室.html)：启动、设备树、串口、网口。
+- **新增：[RTOS 与寄存器实验室](rtos-lab/RTOS与寄存器实验室.html)**：W1C、中断、阻塞与调度、优先级继承、周期任务。使用说明与验证见 [模块 README](rtos-lab/README.md)。
+
+以下保留原通信实验室说明。
+
 # 通信实验室
 
 双击本目录中的 **通信实验室.html** 即可在浏览器离线运行。无需安装依赖或连接板卡。也可打开 `index.html`（须保留同目录的 JS/CSS 文件）。
