@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>嵌入式系统实验室 · 从开机到通信</title><style>:root{--bg:#f2f5f7;--ink:#1b3040;--muted:#637d8e;--line:#dce5eb;--teal:#087e83;--soft:#e9f5f3;--blue:#3774ab;--amber:#b07927;--red:#bc4e50}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'Segoe UI','Microsoft YaHei',sans-serif}h1,h2,h3,p{margin:0}h1{font-size:29px;letter-spacing:-.7px;margin:5px 0 9px}h2{font-size:15px;font-weight:650}button,input,select{font:inherit;color:inherit}button{border:1px solid var(--line);border-radius:6px;background:white;padding:7px 11px;cursor:pointer}button:hover{background:var(--soft)}button:disabled{opacity:.42;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #8cc4ce;outline-offset:2px}.primary{background:var(--teal);color:white;border-color:var(--teal)}.primary:hover{background:#076c70}input,select{display:block;width:100%;min-width:0;background:white;border:1px solid #cbd9e1;border-radius:5px;padding:8px}pre,code{font-family:Consolas,'Microsoft YaHei',monospace}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.8}.fine{font-size:11px;line-height:1.75;color:var(--muted);margin-top:12px}.muted{font-size:11px;color:var(--muted)}.eyebrow{color:var(--teal);font-size:10px;letter-spacing:1px}.tag{font-size:10px;padding:3px 7px;background:#eff4f7;color:var(--muted);border-radius:4px}header{height:70px;padding:0 30px;display:flex;align-items:center;gap:24px;background:white;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-size:15px;font-weight:600;margin-right:auto}.brand>span{width:34px;height:34px;border-radius:9px;background:var(--ink);color:#99e0d6;text-align:center;font:25px/34px sans-serif}.brand small{font:10px Consolas;letter-spacing:1.7px;color:var(--muted);margin-left:7px}.offline{font-size:11px;color:var(--teal)}header button{font-size:12px}main{max-width:1590px;padding:27px 30px;margin:auto}.intro{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}.intro p:not(.eyebrow){font-size:12px;color:var(--muted)}.quiet{font-size:12px;color:var(--teal);background:transparent;border-color:#b5ced4}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:23px}.tabs button{display:flex;gap:13px;align-items:center;text-align:left;padding:15px 18px;border-radius:9px}.tabs button>span{font:13px Consolas;color:#91a8b6}.tabs b{display:block;font-weight:600;font-size:14px}.tabs small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.tabs button[aria-pressed=true]{border-color:#69b0b1;background:#e8f4f2;box-shadow:inset 0 3px var(--teal)}.tabs button[aria-pressed=true]>span{color:var(--teal)}.workspace{display:grid;grid-template-columns:265px minmax(0,1fr);gap:20px;align-items:start}.board-column,.content-column{display:flex;flex-direction:column;gap:18px;min-width:0}.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}.section-head button{font-size:11px}.board-panel{padding:17px}.board-panel h2{font-size:13px}.board-drawing{padding:17px 12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#eaf3f0;border:1px solid #c2d9d1;border-radius:8px;position:relative}.board-chip{border:1px solid #b8cfc7;background:#f8fbf9;border-radius:4px;padding:10px 5px;text-align:center;font-size:11px;position:relative}.board-chip small,.board-port small{font-size:9px;color:#6c8c85}.soc{grid-column:1/-1;margin:0 15px;background:#244b4c;color:white;padding:18px 5px;border:3px double #80aaa3}.soc small{color:#b3d3cf}.board-port{padding:8px 3px;text-align:center;font-size:10px;border:1px solid #cad9d7;border-radius:5px;background:#f3f7f5}.board-port.ready{background:#d4eee6;border-color:#74b5a5}.board-port.failed{background:#faeee5;border-color:#d9b18b}.board-status{margin:17px 0 0}.board-status>div{display:flex;justify-content:space-between;gap:7px;padding:9px 0;border-bottom:1px solid #eef2f5;font-size:11px}.board-status dt{color:var(--muted);flex-shrink:0}.board-status dd{margin:0;text-align:right}.learning p{font-size:12px;color:var(--muted);margin-top:15px}.learning b{color:var(--ink);font-weight:600;display:block;margin-bottom:4px}.deeper{font-size:11px}.deeper summary{font-weight:600;cursor:pointer}.deeper ul{padding-left:16px;color:var(--muted)}.deeper li{margin-top:8px}.deeper a{color:var(--blue);display:block;margin:10px 0;overflow-wrap:anywhere}#experiment-view,#tree-view{display:flex;flex-direction:column;gap:18px}.configuration form{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.configuration label{font-size:11px;color:var(--muted);flex:1 1 130px}.configuration label>input,.configuration label>select{font-size:12px;margin-top:5px}.configuration .message-input{flex:2 1 200px}.configuration form>button{font-size:12px;padding:9px 13px}#validation{color:var(--red);font-size:12px;padding-top:12px}#boot-required{display:flex;align-items:center;gap:15px;background:#fff6e8;padding:12px;border-radius:6px;margin-top:14px;font-size:12px;color:#886421}#boot-required button{font-size:11px;margin-left:auto;flex-shrink:0}#stages{display:flex;gap:8px;flex-wrap:wrap}#stages button{flex:1 1 100px;text-align:left;border-color:transparent;background:#f3f6f8;padding:10px 9px;min-width:0}#stages b{display:block;font-size:11px;font-weight:600}#stages small{display:block;font-size:9px;color:var(--muted);margin-top:4px}#stages button.active{background:#e3f3ee;border-color:#81b7aa}#stages button.past{box-shadow:inset 0 -2px #b9d9cf}.controls{display:flex;align-items:center;gap:5px}.controls button,.controls select{font-size:11px}.controls select{width:67px;padding:7px 5px}.scrubber{display:flex;align-items:center;gap:12px;margin-bottom:15px;color:var(--muted);font-size:11px}.scrubber>span{min-width:45px}.scrubber input{padding:0;accent-color:var(--teal)}.scrubber button{flex-shrink:0;font-size:11px;padding:5px 9px}#event{border-left:3px solid var(--teal);background:#edf6f4;border-radius:0 5px 5px 0;padding:15px 17px;min-height:110px}#event h3{font-size:15px;margin-bottom:6px}#event p{font-size:12px;line-height:1.8;color:#47676c}#result{margin-top:13px;padding:12px 14px;background:#eff8f2;border:1px solid #c4decf;border-radius:6px;font-size:12px}#result.bad{background:#fff5e8;border-color:#e4cfac}#result strong{display:block;margin-bottom:4px}#result p{color:#647b76}.transfer-status{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;border-top:1px solid var(--line);padding-top:14px;margin-top:15px}.transfer-status span{font-size:10px;color:var(--muted);display:block}.transfer-status b{font-size:12px;font-weight:550;display:block;margin-top:4px}.good{color:var(--teal)}.inspect-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;min-width:0}.terminal{background:#18323c;border:1px solid #2d4952;border-radius:10px;overflow:hidden;min-width:0}.terminal-bar{display:flex;align-items:center;gap:10px;background:#213c46;padding:11px 14px;color:#a9c7ca;font-size:10px}.terminal-bar>span{font-size:7px;letter-spacing:2px}.terminal-bar b{font-weight:500}.terminal-bar small{font-size:9px;margin-left:auto;color:#7da1aa}#logs{color:#b4d5cd;padding:15px;min-height:235px;max-height:300px;overflow:auto;font-size:11px;scrollbar-width:thin}#data-body{font-size:11px;color:#486473;min-height:180px;max-height:267px;overflow:auto}.inspect h2{font-size:13px}#uboot-output{background:#f3f6f8;border-radius:6px;padding:13px;margin:13px 0;max-height:200px;overflow:auto;min-height:67px;font-size:11px}#uboot-form{display:flex;align-items:center;gap:10px;font-family:Consolas;font-size:12px}#uboot-form button{flex-shrink:0;font-family:inherit;font-size:11px}#uboot-form span{color:var(--teal)}.wave-scroll{overflow-x:auto;background:#f8fafb;border-radius:6px;max-width:100%}#serial-wave{display:block;min-width:600px;width:100%;height:125px}.byte-results{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.byte-results span{font-size:10px;color:var(--muted);display:block}.byte-results code{font-size:12px;overflow-wrap:anywhere;display:block;color:var(--teal);margin-top:6px}#packet-fields{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}#packet-fields button{font-size:11px;background:#f0f5f8;border-color:transparent}#packet-fields button.active{border-color:var(--teal);background:#e9f6f0}#packet-bytes{display:grid;grid-template-columns:repeat(16,1fr);gap:4px}#packet-bytes button{font:11px Consolas;padding:7px 0;border:1px solid transparent;background:#eff3f7}#packet-bytes button.highlight{background:#dcefeb;border-color:#81b5a5}#packet-bytes button small{display:block;font:8px Consolas;color:var(--muted);margin-bottom:4px}#packet-detail{font-size:11px;color:var(--muted);background:#f4f7f9;border-radius:5px;margin-top:12px;padding:10px;min-height:38px}.tree-intro h2{font-size:19px;margin:7px 0 12px}.tree-intro p:not(.eyebrow){font-size:12px;color:var(--muted)}.tree-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}.tree-cards fieldset{margin:0;padding:18px;border:1px solid var(--line);border-radius:8px;min-width:0}.tree-cards legend{padding:0 6px;font-size:13px;font-weight:600}.tree-cards label{font-size:11px;color:var(--muted);display:block;margin-bottom:15px}.tree-cards label:last-child{margin-bottom:0}.tree-cards select{font-size:12px;margin-top:5px}.tree-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}.tree-actions button{font-size:12px}.tree-pipeline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;margin-bottom:15px}.tree-pipeline span{padding:6px 9px;background:#ecf4f0;border-radius:4px;color:var(--teal)}.tree-pipeline i{font-style:normal;color:var(--muted)}#dts-preview{background:#f4f7f9;padding:18px;border-radius:7px;font-size:12px;max-height:530px;overflow:auto}.hands-on{margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:20px}.hands-on h2{margin:5px 0}.hands-on p:not(.eyebrow){font-size:12px;color:var(--muted)}.hands-on code{background:#eef4f6;padding:11px 17px;font-size:11px;line-height:2;flex-shrink:0}footer{padding:22px 5px 2px;text-align:center;font-size:11px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:1200px){.workspace{grid-template-columns:230px minmax(0,1fr);gap:15px}.panel{padding:16px}.inspect-grid{grid-template-columns:1fr}.terminal-bar small{font-size:10px}.tabs button{padding:12px}.board-panel .tag{display:none}#logs{min-height:170px}#data-body{min-height:130px}.controls{flex-wrap:wrap}}@media(max-width:900px){.workspace{grid-template-columns:1fr}.board-column{display:grid;grid-template-columns:1fr 1fr}.board-drawing{display:none}.deeper{grid-column:1/-1}.learning p{margin-top:10px}.intro .quiet{display:none}.tabs button{gap:9px}.tabs small{font-size:10px}.hands-on{align-items:flex-start}.inspect-grid{grid-template-columns:1fr 1fr}}@media(max-width:640px){header{padding:0 13px;gap:8px}.brand{font-size:13px}.brand small,.offline{display:none}header button{font-size:10px;padding:6px}main{padding:20px 12px}h1{font-size:25px}.tabs{grid-template-columns:1fr 1fr;gap:8px}.tabs button{padding:12px 10px}.tabs b{font-size:12px}.tabs small{font-size:10px}.board-column{grid-template-columns:1fr}.board-panel{padding:14px}.board-status{display:flex;gap:12px;flex-wrap:wrap;margin-top:0}.board-status>div{flex:1 1 90px;display:block;border:0}.board-status dd{text-align:left;margin-top:4px}.learning,.deeper{display:none}.panel{padding:14px}.inspect-grid,.tree-cards{grid-template-columns:1fr}.controls{gap:4px}.controls button{padding:6px 8px}.controls select{padding:6px 4px}.playback>.section-head{align-items:flex-start}.scrubber{gap:7px}#event{min-height:140px}#stages{gap:5px}#stages button{flex-basis:90px}.transfer-status{gap:8px}.transfer-status span{font-size:9px}.terminal-bar small{font-size:8px}#logs{max-height:230px}#packet-bytes{grid-template-columns:repeat(8,1fr)}#uboot-form{flex-wrap:wrap}#uboot-command{flex:1}#uboot-form button{margin-left:auto}.hands-on{flex-direction:column;gap:12px}#boot-required{flex-direction:column;align-items:start}#boot-required button{margin-left:0}.tree-intro h2{font-size:17px}.tree-actions button{font-size:11px}.tree-pipeline{gap:6px}.byte-results{grid-template-columns:1fr}.configuration form{gap:9px}}
+.board-column .deeper{display:block}.content-column .scrubber>span{white-space:nowrap}
+@media(min-width:641px){.panel .byte-results{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style></head>
+<body>
+<header><a href="#" class="brand"><span>▦</span>嵌入式系统实验室 <small>LAB / 04</small></a><span class="offline">● 本地教学仿真</span><button id="export">导出当前实验</button></header>
+<main>
+<section class="intro"><div><p class="eyebrow">一块板子，一条完整的学习路线</p><h1>从按下电源，到收到第一条消息。</h1><p>先看系统怎么起来，再看硬件怎么被找到，最后亲手发出数据。</p></div><button id="quick-boot" class="quiet">先完成当前配置的开机 →</button></section>
+<nav class="tabs" aria-label="选择实验"><button data-tab="boot" aria-pressed="true"><span>01</span><div><b>开机与 U-Boot</b><small>谁把 Linux 带起来</small></div></button><button data-tab="tree" aria-pressed="false"><span>02</span><div><b>设备树与驱动</b><small>告诉系统板上有什么</small></div></button><button data-tab="serial" aria-pressed="false"><span>03</span><div><b>串口通信</b><small>字节怎样走过一根线</small></div></button><button data-tab="network" aria-pressed="false"><span>04</span><div><b>网口通信</b><small>消息怎样变成网络包</small></div></button></nav>
+<div class="workspace">
+<aside class="board-column">
+<section class="panel board-panel"><div class="section-head"><h2>同一块虚拟开发板</h2><span class="tag">教学硬件</span></div><div class="board-drawing" aria-label="处理器、内存、存储、串口和网口的简化示意"><div class="board-chip memory">内存<br><small>运行时放代码</small></div><div class="board-chip storage">存储<br><small>保存系统文件</small></div><div class="board-chip soc">处理器 / SoC<br><small>执行启动程序与 Linux</small></div><div class="board-port" id="board-uart">UART 串口<br><small>TX / RX / GND</small></div><div class="board-port" id="board-eth">Ethernet 网口<br><small>MAC → PHY → 网线</small></div></div><dl class="board-status"><div><dt>系统</dt><dd id="board-system">尚未上电</dd></div><div><dt>串口驱动</dt><dd id="board-serial-status">尚未初始化</dd></div><div><dt>网口驱动</dt><dd id="board-network-status">尚未初始化</dd></div></dl><p class="fine">这里显示已回放到的启动状态。设备树修改需要重新启动，才会成为运行中的配置。</p></section>
+<section class="panel learning"><h2 id="learn-title">先记住这三句话</h2><div id="learn-content"></div></section>
+<details class="panel deeper"><summary>模型范围与官方资料</summary><div id="limitations"></div><div id="sources"></div></details>
+</aside>
+<section class="content-column">
+<section id="tree-view" hidden>
+<div class="panel tree-intro"><p class="eyebrow">硬件说明书，不是驱动程序</p><h2>设备树说“这里有一个设备”，驱动负责“怎么用它”。</h2><p>改下面的配置，再重新启动。观察同一块板子的串口与网口是否还能被 Linux 找到。</p></div>
+<form id="tree-form" class="panel">
+<div class="tree-cards"><fieldset><legend>UART · 串口设备</legend><label>设备是否启用<select id="dt-uart-enabled"><option value="true">启用 · status = okay</option><option value="false">关闭 · status = disabled</option></select></label><label>设备描述能否匹配驱动<select id="dt-uart-compatible"><option value="true">匹配 · study,uart</option><option value="false">写错 · study,unknown</option></select></label><label>内核里是否有对应驱动<select id="dt-uart-driver"><option value="true">有驱动</option><option value="false">没有编译该驱动</option></select></label></fieldset>
+<fieldset><legend>Ethernet · 网口设备</legend><label>设备是否启用<select id="dt-eth-enabled"><option value="true">启用 · status = okay</option><option value="false">关闭 · status = disabled</option></select></label><label>设备描述能否匹配驱动<select id="dt-eth-compatible"><option value="true">匹配 · study,ethernet</option><option value="false">写错 · study,unknown</option></select></label><label>内核里是否有对应驱动<select id="dt-eth-driver"><option value="true">有驱动</option><option value="false">没有编译该驱动</option></select></label></fieldset></div>
+<div class="tree-actions"><button type="submit" class="primary">应用配置并重新启动</button><button type="button" id="dt-restore">恢复默认草稿</button><span id="tree-dirty" class="muted">草稿与启动配置一致</span></div><p class="fine">“有没有编译驱动”是内核构建选项，不是设备树属性。这里把二者放在一起，方便比较。</p>
+</form>
+<section class="panel"><div class="section-head"><h2>你正在改变的设备树</h2><button id="download-dts">下载示例 .dts</button></div><div class="tree-pipeline"><span>DTS · 人读的文本</span><i>→ dtc 编译</i><span>DTB · 启动时传递</span><i>→ U-Boot</i><span>Linux 读取并匹配驱动</span></div><pre id="dts-preview"></pre><p class="fine">虚拟地址与自定义 study,* 设备描述仅供学习。这里生成文本并模拟匹配，没有调用真实 dtc，也不是可直接用于现有板卡的设备树。</p></section>
+</section>
+<section id="experiment-view">
+<section class="panel configuration"><div class="section-head"><div><p class="eyebrow" id="experiment-kicker"></p><h2 id="experiment-title"></h2></div><span class="tag" id="experiment-tag"></span></div><form id="config-form"></form><p id="config-note" class="fine"></p><p id="validation" role="alert" hidden></p><div id="boot-required" hidden><span>还没有运行到可执行应用的 Linux。先完成开机，再回来收发数据。</span><button id="go-boot">去看开机过程</button></div></section>
+<section class="panel flow"><div class="section-head"><h2 id="flow-title">一次启动经过哪些地方</h2><span class="muted">点节点跳到相应步骤</span></div><div id="stages"></div></section>
+<section class="panel playback"><div class="section-head"><h2>逐步观察</h2><div class="controls"><button id="reset" aria-label="回到本实验起点">↶</button><button id="previous">上一步</button><button id="play" class="primary">▶ 播放</button><button id="next">下一步</button><select id="speed" aria-label="回放速度"><option value="1200">慢速</option><option value="650" selected>中速</option><option value="170">快速</option></select></div></div><div class="scrubber"><span id="position"></span><input type="range" id="seek" min="0" value="0" aria-label="实验进度"><button id="first-byte" hidden>第一个字节</button><button id="finish">到结果</button></div><article id="event" aria-live="polite"></article><div id="result" hidden></div><div class="transfer-status" id="transfer-status" hidden><div><span>本地发送完成</span><b id="local-done">尚未</b></div><div><span>对端收到完整消息</span><b id="peer-received">尚未</b></div><div><span>本端读到业务回复</span><b id="reply-received">尚未</b></div></div></section>
+<div class="inspect-grid"><section class="terminal"><div class="terminal-bar"><span>● ● ●</span><b>流程观察器</b><small>模拟记录 · 不是物理串口输出</small></div><pre id="logs" aria-label="累计模拟事件记录"></pre></section><section class="panel inspect"><div class="section-head"><h2 id="data-label">此刻交接的数据</h2><span class="tag">随步骤更新</span></div><pre id="data-body"></pre></section></div>
+<section id="uboot-panel" class="panel"><div class="section-head"><div><p class="eyebrow">启动程序里的小控制台</p><h2>试着与 U-Boot 对话</h2></div><button id="enter-uboot">跳到 U-Boot</button></div><p class="muted">演示命令：help、printenv、printenv bootargs、printenv bootcmd、boot。只在 U-Boot 阶段接受输入。</p><pre id="uboot-output">等待进入 U-Boot…</pre><form id="uboot-form"><span>=&gt;</span><input id="uboot-command" aria-label="模拟 U-Boot 命令" placeholder="输入 help 查看命令" autocomplete="off"><button type="submit">执行演示命令</button></form><p class="fine">此处是本地命令演示，不是远程终端。boot 会继续当前启动场景；不会执行真实硬件操作。</p></section>
+<section id="serial-panel" class="panel" hidden><div class="section-head"><h2>串口线上的位流</h2><span class="muted">1 = 高电平 · 0 = 低电平 · ● 接收采样</span></div><div class="wave-scroll"><svg id="serial-wave" role="img" aria-label="UART 发出的逻辑电平"></svg></div><div class="byte-results"><div><span>发送的 UTF-8 字节</span><code id="serial-tx"></code></div><div><span>对端还原的字节</span><code id="serial-rx"></code></div><div><span>本端读到的 echo 字节</span><code id="serial-reply"></code></div></div><p class="fine">每字节：起始位 0 → 8 个数据位（最低位先发）→ 停止位 1。每格一位，开头额外一格示意空闲。上下两行分别展示请求和之后的业务 echo，按各自位序排列，并非同时发生；反向传输按整段展示。</p></section>
+<section id="packet-panel" class="panel" hidden><div class="section-head"><div><p class="eyebrow">应用消息一层层装进包</p><h2>网口实际传递什么</h2></div><span class="tag">本次请求的预览</span></div><div id="packet-fields"></div><div id="packet-bytes"></div><p id="packet-detail"></p><p class="fine">预览 Ethernet II / IPv4 / UDP / 数据，不含网卡补入的最小帧填充、FCS 和前导码。网口驱动交给 MAC，PHY 再转换为适合网线传输的信号。</p></section>
+</section>
+</section>
+</div>
+<section class="panel hands-on"><div><p class="eyebrow">从看懂，到动手</p><h2>附带真实 Linux 小程序</h2><p>examples 目录包含串口收发、UDP 回声和本机自测。先用虚拟串口与回环地址练习，再换成自己的设备。</p></div><code>make -C examples<br>python3 examples/smoke.py</code></section>
+<footer>独立离线教学项目。启动时序、板卡地址及驱动绑定是明确简化的模型；不操作现有板卡。详细说明与 Linux 实例见同目录 README 和 examples。</footer>
+</main><script>(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.EmbeddedBoot = api;
+})(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
+
+  const stages = ['rom', 'spl', 'uboot', 'kernel', 'drivers', 'userspace'];
+  const defaults = {
+    scenario: 'success', uartEnabled: true, uartDriver: true, uartCompatible: true,
+    ethEnabled: true, ethDriver: true, ethCompatible: true
+  };
+  function freeze(value) {
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      Object.values(value).forEach(freeze);
+      Object.freeze(value);
+    }
+    return value;
+  }
+  function configFor(input) {
+    if (input == null) input = {};
+    if (typeof input !== 'object' || Array.isArray(input)) throw Error('启动参数需要使用对象。');
+    const config = {...defaults};
+    for (const key of Object.keys(defaults)) if (input[key] !== undefined) config[key] = input[key];
+    if (!['success', 'kernel-missing', 'dtb-invalid', 'rootfs-missing'].includes(config.scenario)) {
+      throw Error('请选择支持的启动场景。');
+    }
+    for (const key of Object.keys(defaults).filter(key => key !== 'scenario')) {
+      if (typeof config[key] !== 'boolean') throw Error(key + ' 必须是布尔值。');
+    }
+    return config;
+  }
+  function deviceTree(input) {
+    const c = configFor(input);
+    return `/dts-v1/;
+
+/* 虚拟教学硬件：study,*、地址与引脚均不对应真实板卡。
+ * 此片段只解释硬件描述；不是可在实体板启动的完整设备树。
+ * 实际项目必须使用板级 DTS、真实 bindings、时钟/中断/引脚等资源。
+ */
+/ {
+    model = "Study virtual board";
+    compatible = "study,virtual-board";
+    #address-cells = <2>;
+    #size-cells = <2>;
+
+    aliases { serial0 = &uart0; ethernet0 = &eth0; };
+    chosen {
+        stdout-path = "serial0:115200n8";
+        bootargs = "console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait rw";
+    };
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x0 0x80000000 0x0 0x20000000>;
+    };
+
+    soc {
+        compatible = "simple-bus";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        uart0: serial@10000000 {
+            compatible = "${c.uartCompatible ? 'study,uart' : 'study,unknown-uart'}";
+            reg = <0x0 0x10000000 0x0 0x1000>;
+            status = "${c.uartEnabled ? 'okay' : 'disabled'}";
+        };
+
+        eth0: ethernet@10010000 {
+            compatible = "${c.ethCompatible ? 'study,ethernet' : 'study,unknown-ethernet'}";
+            reg = <0x0 0x10010000 0x0 0x1000>;
+            status = "${c.ethEnabled ? 'okay' : 'disabled'}";
+        };
+    };
+};
+`;
+  }
+  function deviceResult(config, kind) {
+    const name = kind === 'uart' ? '串口' : '网口';
+    if (!config[kind + 'Enabled']) return {ready: false, reason: name + '节点 status="disabled"，本模型不为它创建设备。', code: 'disabled'};
+    if (!config[kind + 'Compatible']) return {ready: false, reason: name + ' compatible 与教学驱动的匹配表不符，设备未绑定驱动。', code: 'no-match'};
+    if (!config[kind + 'Driver']) return {ready: false, reason: name + '硬件描述存在，但对应驱动未提供；设备树不会生成驱动代码。', code: 'no-driver'};
+    return {ready: true, reason: name + '描述启用、compatible 匹配且驱动可用；本模型初始化成功。', code: 'ready'};
+  }
+  function build(input) {
+    const config = configFor(input);
+    const steps = [], logs = [];
+    const state = {
+      bootStage: 'rom', linuxRunning: false, userspaceReady: false, halted: false,
+      uartReady: false, ethReady: false,
+      uartReason: 'Linux 尚未初始化串口驱动。', ethReason: 'Linux 尚未初始化网口驱动。'
+    };
+    const dts = deviceTree(config);
+    const bootargs = 'console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait rw';
+    function add(key, stage, title, detail, message, label, body) {
+      if (!stages.includes(stage)) throw Error('Unknown boot stage');
+      state.bootStage = stage;
+      if (message) logs.push('[观察器 / 模拟] ' + message);
+      steps.push({key, stage, title, detail, logs: logs.slice(), state: {...state}, data: {label: label || '这一刻的数据', body: body || ''}});
+    }
+    function result(ok, title, detail) {
+      return freeze({
+        kind: 'boot', config, steps, outcome: {ok, title, detail},
+        limits: [
+          '这是 ARM64 风格虚拟板卡的教学流程；没有执行 BootROM、U-Boot、Linux 或 dtc，也不启动虚拟机。',
+          '所有日志均由观察器合成，包含真实串口未必能输出的早期步骤。串口节点禁用或驱动缺失时，真实 Linux 控制台可能静默；界面仍可观察模拟状态。',
+          'SPL 和这里的阶段顺序是示例。实际启动可包含 TPL、TF-A、OP-TEE 等，部分平台没有单独 SPL。',
+          'study,* compatible、内存与寄存器地址是虚拟教学设定；所生成 DTS 缺少完整平台资源，不是实体板可用的启动配置。',
+          '设备初始化只检查 status、compatible 和驱动是否可用；真实 probe 还依赖时钟、中断、复位、引脚、PHY 等，可能延迟或失败。',
+          '本例从存储设备加载未压缩 Image，使用 booti 并直接挂载磁盘根文件系统，未展开 initramfs、签名验证、地址重定位与文件系统驱动。',
+          '驱动都按内建或已经可用处理，未模拟模块加载。网口就绪只表示控制器驱动注册完成，链路状态和 IP 配置仍需另行确认。',
+          '内核已取得执行权与用户空间已启动是两个状态；rootfs 失败时内核可已运行，但通信应用无法启动。'
+        ],
+        sources: [
+          {title: 'U-Boot 官方：booti、Image 与 DTB 参数', url: 'https://docs.u-boot.org/en/latest/usage/cmd/booti.html'},
+          {title: 'Linux 官方：设备树的硬件描述与设备创建', url: 'https://docs.kernel.org/devicetree/usage-model.html'},
+          {title: 'U-Boot 官方：SPL / TPL 启动阶段', url: 'https://docs.u-boot.org/en/latest/develop/spl.html'}
+        ]
+      });
+    }
+    add('power-on', 'rom', '上电：CPU 先执行芯片里的 BootROM',
+      'BootROM 是芯片固化的启动代码。它按启动配置寻找下一段程序；此时 Linux 还没有运行，通常也不能假定串口已能打印。',
+      '上电复位 → BootROM（本行来自观察器，不是实际串口输出）', '此时在哪里执行',
+      '芯片内部 ROM → 读取启动介质 → 将下一阶段载入片内 SRAM');
+    add('rom-load', 'rom', 'BootROM 找到并装入第一段可变程序',
+      '本例假设芯片从存储器加载 SPL 到片内 SRAM。BootROM 是否会校验签名、可读取哪些介质，由具体芯片决定。',
+      'BootROM: 教学路径选中存储介质，装入 SPL', '先装入的小程序',
+      'BootROM → SRAM 中的 SPL\n此时尚不依赖已经初始化的大容量 DDR。');
+    add('spl-ddr', 'spl', 'SPL：先把大内存准备好',
+      '这块虚拟板使用 SPL 初始化必要的时钟和 DDR，再为后续大程序提供运行空间。SPL 是一种常见安排，不是所有板卡必须有的阶段。',
+      'SPL: 初始化所需时钟与 DDR（教学假设）', '内存角色',
+      'SRAM：片内、较小，早期代码可使用\nDDR：容量较大，初始化后供 U-Boot / Linux 使用');
+    add('spl-load', 'spl', 'SPL 把完整 U-Boot 装入 DDR',
+      '准备好内存后，SPL 加载完整 U-Boot 并交出执行权。本实验省略平台固件和安全世界初始化。',
+      'SPL: 加载 U-Boot proper → 跳转', '控制权变化',
+      'CPU 当前执行 SPL → CPU 改为执行 U-Boot\n这两者都不是 Linux 内核。');
+    add('uboot-prompt', 'uboot', 'U-Boot：选择要启动的系统',
+      'U-Boot 可以访问它支持的存储器并提供命令行。本例假设它自己的串口驱动可用；这不能证明 Linux 的设备树或串口驱动配置也正确。',
+      'U-Boot: 教学命令行准备好（使用自身串口实现）', '只读查看示例',
+      'printenv bootcmd bootargs kernel_addr_r fdt_addr_r\n# 本界面展示含义，不在实体设备执行命令。');
+    if (config.scenario === 'kernel-missing') {
+      state.halted = true;
+      add('kernel-load-failed', 'uboot', '找不到 Image：停在 U-Boot',
+        '本次内核文件加载失败，没有可执行的 Linux 镜像，因此不会跳进内核。检查启动介质、分区、路径与镜像是否存在。',
+        'load Image: 文件不存在；保留 U-Boot 命令行', '失败边界',
+        'load mmc 0:1 ${kernel_addr_r} Image\n→ 模拟失败：未找到文件\nLinux 尚未执行。');
+      return result(false, '停在 U-Boot：内核文件缺失', 'Image 没有成功装入内存，Linux 尚未启动。这个问题发生在设备驱动初始化之前。');
+    }
+    add('load-image', 'uboot', '把 Linux Image 读到 DDR',
+      'Image 是内核镜像。加载只是把文件内容放入内存；CPU 仍在运行 U-Boot，还没有执行 Linux。加载地址必须遵循真实板卡的内存布局。',
+      'load Image: 模拟装入内存完成', '读文件到内存（示意）',
+      'load mmc 0:1 ${kernel_addr_r} Image\n# 变量由真实板卡环境定义，示例不指定可用于烧录的物理地址。');
+    add('load-dtb', 'uboot', '再装入这块板的硬件描述 DTB',
+      '设备树描述有哪些硬件及其资源。DTS 是文本，通常由构建工具编译成 DTB；U-Boot 把 DTB 提供给内核。它不是驱动程序。',
+      'load board.dtb: 模拟读取 DTB', '文本与二进制的关系',
+      'board.dts --dtc（真实构建工具）--> board.dtb\nU-Boot 将 board.dtb 装入 ${fdt_addr_r}\n本程序仅根据表单生成教学描述，不真正调用 dtc。');
+    if (config.scenario === 'dtb-invalid') {
+      state.halted = true;
+      add('dtb-check-failed', 'uboot', 'DTB 格式损坏：无法按本路径启动',
+        '本次故意让设备树二进制格式校验失败，U-Boot 在交接前停止。它和节点 status="disabled" 不同：后者是合法设备树中的配置。',
+        'FDT: 模拟格式检查失败；未跳转到内核', '故障类型',
+        'DTB 格式无效 ≠ 串口节点 disabled\n前者破坏启动输入；后者只表示本模型不启用该设备。');
+      return result(false, '停在 U-Boot：DTB 格式无效', '内核所需的设备树输入没有通过本次启动检查。Linux 尚未执行，不应归因于串口或网口驱动。');
+    }
+    add('bootargs', 'uboot', '告诉内核控制台和根文件系统在哪里',
+      '本例把启动参数放入交给内核的 /chosen/bootargs。console 指定期望的控制台；root 指定根文件系统来源。名字和分区号必须与真实板卡一致。',
+      'bootargs: ' + bootargs, '启动参数（教学设备名）',
+      bootargs + '\n\nconsole：期望的日志输出设备\nroot：/sbin/init 等系统文件所在的根文件系统\nrootwait：等待根设备出现，不会自动修复缺失设备');
+    add('handoff', 'uboot', 'booti：把执行权交给 Linux',
+      'booti 使用内核地址和 DTB 地址启动 Image；中间的 - 表示本例不传入 initrd。该命令正常启动后不会继续停留在 U-Boot 命令行。',
+      'booti: 参数检查完成 → 准备进入内核', 'U-Boot 的交接命令',
+      'booti ${kernel_addr_r} - ${fdt_addr_r}\n    内核镜像地址       设备树地址\n# 本例不使用 initrd。');
+    state.linuxRunning = true;
+    add('kernel-enter', 'kernel', 'Linux 开始执行，接管系统',
+      '内核现在获得执行权并完成自己的早期初始化。它将使用自己的驱动体系；不能把 U-Boot 的驱动初始化当成 Linux 设备已经可用。',
+      'Linux: 已进入内核（观察器记录，不保证串口已能输出）', '两套软件的边界',
+      'U-Boot 驱动：启动阶段读取存储、输出命令行\nLinux 驱动：运行阶段管理设备、向应用提供接口');
+    add('parse-dt', 'kernel', '内核读取 DTB：认识这块板的硬件',
+      '内核解析内存、启动参数和设备节点。本模型接下来逐项检查 status、compatible 与可用驱动；真实内核还需处理更多平台资源。',
+      'Linux: 解析硬件描述、启动参数与设备节点', '本次表单生成的 DTS 教学视图', dts);
+    for (const kind of ['uart', 'eth']) {
+      const device = deviceResult(config, kind);
+      state[kind + 'Ready'] = device.ready;
+      state[kind + 'Reason'] = device.reason;
+      const name = kind === 'uart' ? '串口' : '网口';
+      const compatible = kind === 'uart' ? 'study,uart' : 'study,ethernet';
+      const deviceName = kind === 'uart' ? '/dev/ttyS0（教学名称）' : 'eth0（教学名称）';
+      add(kind + '-probe', 'drivers', name + (device.ready ? '驱动初始化完成' : '没有进入可用状态'),
+        device.reason + (kind === 'uart' ? '如果它是唯一控制台，真实串口在 Linux 阶段可能没有输出；此处日志由观察器展示。' : '驱动就绪不等于网线已连接，也不等于配置好了 IP 地址。'),
+        name + ': ' + device.code + ' — ' + (device.ready ? deviceName : device.reason),
+        '设备描述与驱动的关系',
+        '节点启用：' + (config[kind + 'Enabled'] ? '是' : '否') + '\ncompatible 匹配 ' + compatible + '：' + (config[kind + 'Compatible'] ? '是' : '否') +
+        '\n对应 Linux 驱动可用：' + (config[kind + 'Driver'] ? '是' : '否') + '\n结果：' + (device.ready ? '在教学模型中注册 ' + deviceName : device.reason));
+    }
+    if (config.scenario === 'rootfs-missing') {
+      state.halted = true;
+      add('rootfs-failed', 'kernel', '根文件系统没有挂载成功',
+        '内核已经执行，但找不到本例指定的根文件系统，无法运行 /sbin/init。真实 rootwait 可能持续等待；本实验把这一阶段汇总为启动受阻，不编造等待时间。',
+        'rootfs: 模拟根设备不可用，用户空间尚未启动', '当前能与不能做的事',
+        'Linux 内核：已取得执行权\n根文件系统：尚未挂载\n/sbin/init：未运行\n用户的串口 / 网口应用：无法启动');
+      return result(false, '内核已启动，卡在根文件系统', '检查 root 参数、存储驱动、分区和文件系统。即使某个通信驱动已初始化，也没有进入可运行用户程序的系统。');
+    }
+    add('rootfs-mounted', 'kernel', '挂载根文件系统，找到系统程序',
+      '根文件系统提供 /sbin/init、库和配置文件。它与内核 Image 是不同的东西。本例假定存储与文件系统驱动可用。',
+      'rootfs: 模拟挂载成功；找到 /sbin/init', '三个文件各做什么',
+      'Image：内核程序\nboard.dtb：硬件描述\n根文件系统：用户空间程序、库、配置与数据');
+    state.userspaceReady = true;
+    add('init', 'userspace', '启动 init：进入用户空间',
+      '内核启动第一个用户空间进程。本例假设它完成基本初始化；后续服务、登录入口和网络配置由用户空间安排。',
+      'init: 基本用户空间准备就绪（观察器视角）', '下一步由谁完成',
+      '/sbin/init → 启动服务 / 提供登录入口 → 运行串口或网口应用');
+    add('ready', 'userspace', '系统已启动，再看每个接口是否可用',
+      '操作系统启动成功与所有外设可用是两件事。你可以禁用一个设备节点、移除驱动或改错 compatible，观察系统仍启动而该接口不可用。',
+      '系统就绪：串口 ' + (state.uartReady ? '可用' : '不可用') + '；网口驱动 ' + (state.ethReady ? '可用' : '不可用'),
+      '实验状态',
+      '用户空间：已就绪\n串口：' + state.uartReason + '\n网口：' + state.ethReason + '\n注意：以上不是来自真实硬件的探测结果。');
+    const unavailable = [!state.uartReady && '串口', !state.ethReady && '网口'].filter(Boolean);
+    return result(true, unavailable.length ? '系统已启动，部分接口不可用' : '系统已启动，可以开始通信实验',
+      unavailable.length ? '用户空间已运行；' + unavailable.join('和') + '需检查设备树启用状态、compatible 与对应驱动。设备树不会自动生成驱动。'
+        : '用户空间与两个教学接口已准备好。串口还要约定通信参数；网口还要确认链路、地址和对端程序。');
+  }
+  return freeze({build, deviceTree});
+});
+</script><script>(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.EmbeddedComms = api;
+})(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
+
+  const hex = values => values.map(v => v.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+  const same = (a, b) => a.length === b.length && a.every((value, i) => value === b[i]);
+  function freeze(value) {
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      Object.values(value).forEach(freeze);
+      Object.freeze(value);
+    }
+    return value;
+  }
+  function textBytes(value) {
+    if (typeof value !== 'string') throw new Error('数据请输入文本。');
+    const data = Array.from(new TextEncoder().encode(value));
+    if (!data.length || data.length > 32) throw new Error('请输入 1～32 个 UTF-8 字节；一个中文字符通常占 3 字节。');
+    return data;
+  }
+  function number(value, min, max, label) {
+    if (!Number.isInteger(value) || value < min || value > max) throw new Error(label + '应为 ' + min + '～' + max + ' 的整数。');
+    return value;
+  }
+  function readyValue(value) {
+    if (typeof value !== 'boolean') throw new Error('设备就绪状态必须是布尔值。');
+    return value;
+  }
+  function recorder() {
+    const steps = [], logs = [], state = {localDone: false, peerReceived: false, replyReceived: false};
+    function add(key, stage, title, detail, body = '', label = '这一层的数据', extra = {}) {
+      logs.push('[' + stage + '] ' + title);
+      const item = {key, stage, title, detail, logs: logs.slice(), data: {label, body}, state: {...state}, ...extra};
+      steps.push(item);
+      return item;
+    }
+    return {steps, state, add};
+  }
+
+  const serialSources = [
+    {title: 'Linux：串口底层驱动接口', url: 'https://docs.kernel.org/driver-api/serial/driver.html'},
+    {title: 'Microchip：UART 异步帧、最低位先发', url: 'https://onlinedocs.microchip.com/oxy/GUID-61202E6F-BC03-4D81-AAB9-269E87F9B49C-en-US-22/GUID-F37FDF72-1D87-438A-A2F1-D70FD2AC07AC.html'}
+  ];
+  const serialLimits = [
+    '教学模型采用逻辑电平串口、8N1、共同参考地。RS-232 / RS-485 另需相应电气接口；这里不模拟其电压。',
+    '每个发送字节的起始边沿都被理想识别，再按接收波特率做中心采样。大失配时实际硬件还可能漏检起始位；未模拟过采样、噪声或 FIFO 溢出。',
+    '驱动采用通用 TTY / 串口层路径。中断、DMA 与轮询因具体控制器和驱动而不同，动画没有规定其中某一种实现。',
+    '对端程序在本次观察窗口结束后回显已通过格式检查的字节。这个 echo 是双方自定义业务，不是 UART 协议的 ACK，也不证明其他业务已经执行。',
+    '错接 TX–TX 场景仅示意数据没有到达 RX。真实两个输出相连可能产生电气冲突，不能按此模型接线。',
+    '模拟日志由实验观察器产生，不是从实际串口收集的输出。所有时序为理想协议时间。回显从正向收发观察结束计时，不计应用处理与内核调度的耗时。'
+  ];
+
+  function uartEncode(data) {
+    return data.map(byte => '0' + Array.from({length: 8}, (_, bit) => (byte >> bit) & 1).join('') + '1').join('');
+  }
+  function uartDecode(data, txBaud, rxBaud) {
+    const wire = uartEncode(data), txBitUs = 1e6 / txBaud, rxBitUs = 1e6 / rxBaud;
+    const frames = data.map((byte, byteIndex) => {
+      const startUs = byteIndex * 10 * txBitUs;
+      const samples = Array.from({length: 10}, (_, offset) => {
+        const timeUs = startUs + (offset + 0.5) * rxBitUs;
+        const wireIndex = Math.floor(timeUs / txBitUs + 1e-10);
+        return {timeUs, value: wireIndex >= wire.length ? 1 : Number(wire[wireIndex]),
+          expected: Number(wire[byteIndex * 10 + offset]),
+          field: offset === 0 ? 'START' : offset === 9 ? 'STOP' : 'DATA', bitIndex: offset - 1};
+      });
+      const received = samples.slice(1, 9).reduce((value, sample, i) => value | (sample.value << i), 0);
+      return {byteIndex, byte, bits: wire.slice(byteIndex * 10, byteIndex * 10 + 10), startUs,
+        samples, received, framingOk: samples[0].value === 0 && samples[9].value === 1};
+    });
+    return {wire, frames, durationUs: data.length * 10 * txBitUs,
+      received: frames.filter(frame => frame.framingOk).map(frame => frame.received)};
+  }
+
+  function serial(options = {}) {
+    if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error('串口参数应为对象。');
+    const text = options.text === undefined ? 'Hello' : options.text;
+    const sent = textBytes(text);
+    const baud = number(options.baud === undefined ? 115200 : options.baud, 1200, 2000000, '发送波特率');
+    const peerBaud = number(options.peerBaud === undefined ? baud : options.peerBaud, 1200, 2000000, '对端波特率');
+    const ready = readyValue(options.ready === undefined ? true : options.ready);
+    const scenario = options.scenario === undefined ? 'success' : options.scenario;
+    if (!['success', 'crossed-wrong', 'no-reply'].includes(scenario)) throw new Error('未知串口实验场景。');
+    const config = {text, baud, peerBaud, ready, scenario, disabledReason: String(options.disabledReason || '设备树或驱动尚未让串口就绪')};
+    const r = recorder(), rx = [], received = [], model = uartDecode(sent, baud, peerBaud);
+    let visibleBits = '1', replyBits = '', outcome, echoFrames = [], echoStartUs = null;
+    const emit = (key, stage, title, detail, body, label, extra = {}) => r.add(key, stage, title, detail, body, label, {
+      signals: [{name: scenario === 'crossed-wrong' ? '本机 TX（未接到对端 RX）' : 'TX → 对端 RX', bits: visibleBits}, ...(replyBits ? [{name: '对端 TX → 本机 RX', bits: replyBits}] : [])],
+      bytes: {tx: sent.slice(), peer: received.slice(), rx: rx.slice()}, ...extra
+    });
+    const finish = () => {
+      emit('complete', 'complete', outcome.title, outcome.detail, '本地已发完：' + r.state.localDone + '\n对端应用收到完整字节：' + r.state.peerReceived + '\n本端读到业务回显：' + r.state.replyReceived, '分别观察三个结果');
+      return freeze({kind: 'serial', config, steps: r.steps, outcome, sent: sent.slice(), received: received.slice(), returned: rx.slice(),
+        frames: ready && scenario !== 'crossed-wrong' ? model.frames : [], wireBits: ready ? model.wire : '', echoFrames, echoStartUs,
+        limits: serialLimits.slice(), sources: serialSources.map(source => ({...source}))});
+    };
+    emit('open', 'software', '应用打开串口并准备文字', '示例程序以原始模式打开串口设备，再通过 termios 设置 8N1 和波特率。文字先编码成 UTF-8 字节。',
+      '文本：' + text + '\nUTF-8：' + hex(sent) + '\n格式：8N1\n发送 ' + baud + ' baud；对端 ' + peerBaud + ' baud', '应用缓冲区');
+    if (!ready) {
+      emit('device-unavailable', 'driver', '串口设备还不能使用', config.disabledReason + '。先检查开机和设备树/驱动页面；本次不会产生线上数据。', '未提交发送字节。', '打开设备未完成');
+      outcome = {ok: false, code: 'unavailable', title: '串口未就绪，发送没有开始', detail: config.disabledReason};
+      return finish();
+    }
+    emit('write', 'kernel', 'write 把字节交给 TTY 层', '原始模式下不做换行转换。write 返回表示数据被接受进入软件发送路径，还不表示最后一位已离开发送引脚。', hex(sent), 'TTY 中等待发送的字节');
+    emit('driver-fill', 'driver', '串口驱动填入发送缓冲区', '驱动把字节交给 UART 控制器。实际可以用中断、DMA 或轮询搬运，本实验不绑定具体硬件。', hex(sent), 'UART 发送缓冲区');
+    emit('configure', 'controller', 'UART 给每个字节加上边界', '空闲为 1，起始位为 0，8 个数据位最低位先发，停止位为 1。收发双方各自计时，没有时钟线。',
+      model.frames.map(frame => '0x' + hex([frame.byte]) + ' → ' + frame.bits[0] + ' | ' + frame.bits.slice(1, 9) + ' | ' + frame.bits[9]).join('\n'), '8N1 帧预览：起始 | 数据 b0…b7 | 停止');
+    const events = [];
+    for (let i = 0; i < model.wire.length; i++) events.push({kind: 'wire', at: i * 1e6 / baud, order: 0, index: i});
+    if (scenario !== 'crossed-wrong') for (const frame of model.frames) {
+      for (const sample of frame.samples) events.push({kind: 'sample', at: sample.timeUs, order: 1, frame, sample});
+      events.push({kind: 'decode', at: frame.samples[9].timeUs, order: 2, frame});
+    }
+    events.push({kind: 'txdone', at: model.durationUs, order: 3});
+    events.sort((a, b) => a.at - b.at || a.order - b.order);
+    let sampledBits = '';
+    for (const event of events) {
+      if (event.kind === 'wire') {
+        const index = event.index, frameIndex = Math.floor(index / 10), offset = index % 10;
+        visibleBits += model.wire[index];
+        const field = offset === 0 ? '起始位' : offset === 9 ? '停止位' : '数据位 b' + (offset - 1);
+        emit('wire-' + index, 'wire', '第 ' + (frameIndex + 1) + ' 字节 · ' + field + ' = ' + model.wire[index],
+          scenario === 'crossed-wrong' ? '本机 TX 仍在输出，但它被错接到对端 TX，数据没有进入对端 RX。' : '本机把这一位保持在线上。对端按自己的时钟，在预定采样点读取电平。',
+          'TX 已输出：' + visibleBits + '\n对端已采的数据位：' + (sampledBits || '尚无'), '电平不是一次读完的字符串', {timeUs: event.at});
+      } else if (event.kind === 'sample') {
+        const sample = event.sample;
+        if (sample.field === 'DATA') sampledBits += sample.value;
+        emit('sample-' + event.frame.byteIndex + '-' + sample.field + '-' + sample.bitIndex, 'peer', '对端采样：' + (sample.field === 'DATA' ? 'b' + sample.bitIndex : sample.field === 'START' ? '起始位' : '停止位') + ' → ' + sample.value,
+          '对端采样时刻由自己的 ' + peerBaud + ' baud 时钟产生。' + (sample.value !== sample.expected ? '观察器发现这一位与发送端不同；硬件是否报错还要看起始/停止位检查。' : ''),
+          '累计数据位：' + (sampledBits || '尚无') + '\n已通过格式检查的字节：' + (hex(received) || '尚无'), '从电平累积数据位', {timeUs: event.at, sample: {...sample}});
+      } else if (event.kind === 'decode') {
+        const frame = event.frame;
+        if (frame.framingOk) received.push(frame.received);
+        emit('decode-' + frame.byteIndex, 'peer', frame.framingOk ? '对端拼出字节 0x' + hex([frame.received]) : '对端发现字节边界不正确',
+          frame.framingOk ? '将 8 次数据采样依次放到 b0…b7；通过起始位和停止位检查后进入接收缓冲区。' : '起始位或停止位不符合 8N1。本实验丢弃这个字节；实际驱动也可能附错误标记交给应用。',
+          hex(received) || '没有可交付字节', '对端接收缓冲区', {timeUs: event.at});
+      } else {
+        r.state.localDone = true;
+        emit('txdone', 'controller', '本机 UART 已把最后一个停止位发完', '此时本地发送完成。它没有收到任何 UART 协议 ACK，不能由此断定对端收到，更不能断定对端应用已处理。',
+          '本地发送完成；尚未收到业务回显。', '发送完成与收到回复是两件事', {timeUs: event.at});
+      }
+    }
+    if (scenario === 'crossed-wrong') {
+      outcome = {ok: false, code: 'wiring', title: '本机发完了，对端没有收到', detail: '本实验模拟 TX–TX 错接。逻辑电平串口应使本机 TX 接对端 RX、对端 TX 接本机 RX，并共地。真实错接可能产生输出冲突。'};
+      return finish();
+    }
+    r.state.peerReceived = received.length === sent.length;
+    emit('peer-app', 'peer', '对端驱动把可接收的字节交给程序', '这里观察的是应用收到的字节，尚不是本机收到回复。硬件可能没有检测出某些数据位错误。', hex(received) || '没有有效字节', '对端应用读取的字节');
+    if (scenario === 'no-reply' || !received.length) {
+      outcome = {ok: false, code: scenario === 'no-reply' ? 'no-reply' : 'framing', title: scenario === 'no-reply' ? '对端没有发送业务回显' : '格式错误，没有有效字节可回显',
+        detail: '本机发送已经完成。UART 没有内建确认；本次演示等待窗口内没有收到业务回复。' + (!same(received, sent) ? '观察器还发现接收结果与发送内容不一致。' : '')};
+      return finish();
+    }
+    const echo = uartDecode(received, peerBaud, baud);
+    echoStartUs = Math.max(model.durationUs, ...model.frames.map(frame => frame.samples[9].timeUs));
+    echoFrames = echo.frames;
+    const echoEndUs = echoStartUs + Math.max(echo.durationUs, ...echo.frames.map(frame => frame.samples[9].timeUs));
+    replyBits = '1';
+    emit('echo-submit', 'return', '对端程序选择回显收到的字节', '双方约定：接收程序把可用字节原样发回来。这个行为来自应用代码，不是 UART 控制器自动 ACK。这里以正向收发观察结束作为回显起点，省略软件处理耗时。', hex(received), '业务 echo 内容', {timeUs: echoStartUs});
+    replyBits += echo.wire;
+    emit('echo-wire', 'return', '业务回显经过反向 TX → RX', '这一步合并展示整段回显。对端 UART 用自己的波特率组帧，本机 UART 用本机波特率采样。反向链路也可能因波特率失配出错。',
+      echo.frames.map(frame => '发出 ' + hex([frame.byte]) + ' → 本机采到 ' + hex([frame.received]) + (frame.framingOk ? '（格式通过）' : '（格式错误）')).join('\n'), '反向串口传输', {timeUs: echoEndUs});
+    rx.push(...echo.received);
+    r.state.replyReceived = rx.length > 0;
+    emit('read', 'software', '本机应用通过 read 取回字节', '串口驱动把反向链路的接收字节交给 TTY，再由应用读取。应用可比较业务内容来决定是否成功。', hex(rx) || '没有有效回复字节', '应用读到的业务回复', {timeUs: echoEndUs});
+    const matched = same(received, sent) && same(rx, sent);
+    outcome = {ok: matched, code: matched ? 'success' : model.frames.some(frame => !frame.framingOk) || echo.frames.some(frame => !frame.framingOk) ? 'framing' : 'corrupted',
+      title: matched ? '本机读到了相同的业务回显' : '发送完成，但收发字节不一致',
+      detail: matched ? '本次程序约定的 echo 往返成功。它是应用层回复；UART 本身没有 ACK。' : '观察器比较出收发内容不一致。起始/停止位异常会形成格式错误；仅数据位误读时 UART 硬件可能不报错。'};
+    return finish();
+  }
+
+  const networkSources = [
+    {title: 'RFC 768：UDP 头、校验和与不保证交付', url: 'https://www.rfc-editor.org/rfc/rfc768.html'},
+    {title: 'RFC 791：IPv4 头与头部校验和', url: 'https://www.rfc-editor.org/rfc/rfc791.html'},
+    {title: 'RFC 826：用 ARP 将 IPv4 地址解析为以太网地址', url: 'https://www.rfc-editor.org/rfc/rfc826.html'},
+    {title: 'RFC 792：ICMP 端口不可达', url: 'https://www.rfc-editor.org/rfc/rfc792.html'},
+    {title: 'Linux：MAC 与 PHY 的分工', url: 'https://docs.kernel.org/networking/phy.html'}
+  ];
+  const networkLimits = [
+    '模型是单局域网、静态 IPv4、UDP、无网关、无 VLAN、无 IP 分片。发送前 ARP 缓存为空；每次实验重新解析地址。',
+    '展示的 Ethernet 字节从目标 MAC 开始，只含 14 字节 Ethernet II 头、IPv4、UDP 与数据；不含前导码、SFD、最小帧补齐、FCS、帧间隙。它不是完整的线缆位流。',
+    'IPv4 和 UDP 校验和由本模型计算。UDP 伪首部仅参与计算，不会额外插入 UDP 报文。Ethernet FCS 未计算或展示；PHY 的编码与模拟电压也未展开。',
+    '采用通用 Linux socket / 网络栈 / 驱动 / DMA / MAC / PHY 路径，DMA 与完成处理仅示意，不绑定当前 CAN 板卡。真实网络栈可先组 IP 包再排队等待邻居解析。',
+    '正常场景中的回复是对端应用定义的 UDP echo。UDP 没有内建 ACK、重发或交付保证；本机发送完成不证明对端应用收到。',
+    '端口无人监听场景假定无防火墙过滤，观察到 ICMP Port Unreachable；真实系统可能限速或丢弃 ICMP，应用获得异步错误的方式取决于 socket 配置。',
+    '地址无人确认、断线和无回复只展示原因与结果，不把实验播放时间当作操作系统真实超时时间。日志由观察器合成。'
+  ];
+  const localMac = [2, 0, 0, 0, 0, 16], remoteMac = [2, 0, 0, 0, 0, 32];
+  const word = value => [value >> 8 & 255, value & 255];
+  const readWord = (data, start) => (data[start] << 8) | data[start + 1];
+  function checksum(data) {
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 2) sum += (data[i] << 8) | (data[i + 1] || 0);
+    while (sum > 65535) sum = (sum & 65535) + (sum >>> 16);
+    return (~sum) & 65535;
+  }
+  function ipv4(value, label) {
+    if (typeof value !== 'string' || !/^(?:0|[1-9]\d{0,2})(?:\.(?:0|[1-9]\d{0,2})){3}$/.test(value)) throw new Error(label + '请填写标准 IPv4 地址，例如 192.168.1.10。');
+    const parts = value.split('.').map(Number);
+    if (parts.some(v => v > 255) || parts[0] === 0 || parts[0] === 127 || parts[0] >= 224) throw new Error(label + '请使用普通单播 IPv4 地址。');
+    return parts;
+  }
+  const ipNumber = parts => parts.reduce((value, part) => (value * 256 + part) >>> 0, 0);
+  function buildPacket(payload, sourceIp, targetIp, sourcePort, targetPort, sourceMac, targetMac) {
+    const udpLength = payload.length + 8, ipLength = udpLength + 20;
+    const udp = [...word(sourcePort), ...word(targetPort), ...word(udpLength), 0, 0, ...payload];
+    const pseudo = [...sourceIp, ...targetIp, 0, 17, ...word(udpLength)];
+    const udpCheck = checksum([...pseudo, ...udp]) || 65535;
+    udp.splice(6, 2, ...word(udpCheck));
+    const ip = [0x45, 0, ...word(ipLength), 0, 1, 0x40, 0, 64, 17, 0, 0, ...sourceIp, ...targetIp];
+    ip.splice(10, 2, ...word(checksum(ip)));
+    const ethernet = [...targetMac, ...sourceMac, 0x08, 0x00];
+    return {bytes: [...ethernet, ...ip, ...udp], ethernet, ip, udp: udp.slice(0, 8), payload: payload.slice(),
+      udpDatagram: udp, pseudoHeader: pseudo, sourceMac: sourceMac.slice(), peerMac: targetMac.slice(),
+      fields: [{name: '目标 MAC', start: 0, end: 6, detail: '当前局域网中的接收网卡地址'},
+        {name: '源 MAC', start: 6, end: 12, detail: '发出这一以太网帧的网卡地址'},
+        {name: 'EtherType', start: 12, end: 14, detail: '0x0800 表示 IPv4'},
+        {name: 'IPv4 头', start: 14, end: 34, detail: '20 字节，含源/目的 IP、协议 17 与头校验和'},
+        {name: 'UDP 头', start: 34, end: 42, detail: '源/目的端口、UDP 长度与 UDP 校验和'},
+        {name: '业务数据', start: 42, end: 42 + payload.length, detail: '应用的 UTF-8 字节'}]};
+  }
+  function arpPacket(reply, sourceIp, targetIp) {
+    const source = reply ? remoteMac : localMac, target = reply ? localMac : [255, 255, 255, 255, 255, 255];
+    return [...target, ...source, 0x08, 0x06, 0, 1, 0x08, 0, 6, 4, 0, reply ? 2 : 1,
+      ...source, ...(reply ? targetIp : sourceIp), ...(reply ? localMac : [0, 0, 0, 0, 0, 0]), ...(reply ? sourceIp : targetIp)];
+  }
+  function packetText(packet) {
+    return packet.fields.map(field => field.name + ' [' + field.start + '..' + (field.end - 1) + ']\n' + hex(packet.bytes.slice(field.start, field.end))).join('\n\n');
+  }
+
+  function network(options = {}) {
+    if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error('网口参数应为对象。');
+    const text = options.text === undefined ? 'Hello' : options.text, sent = textBytes(text);
+    const sourceIp = options.sourceIp === undefined ? '192.168.1.10' : options.sourceIp;
+    const peerIp = options.peerIp === undefined ? '192.168.1.20' : options.peerIp;
+    const source = ipv4(sourceIp, '本机地址'), peer = ipv4(peerIp, '对端地址');
+    const prefix = number(options.prefix === undefined ? 24 : options.prefix, 8, 30, '本实验前缀长度');
+    const sourcePort = number(options.sourcePort === undefined ? 40000 : options.sourcePort, 1, 65535, '本机端口');
+    const peerPort = number(options.peerPort === undefined ? 9000 : options.peerPort, 1, 65535, '对端端口');
+    const ready = readyValue(options.ready === undefined ? true : options.ready);
+    const scenario = options.scenario === undefined ? 'success' : options.scenario;
+    if (!['success', 'cable', 'arp', 'port', 'no-reply'].includes(scenario)) throw new Error('未知网口实验场景。');
+    const sourceNumber = ipNumber(source), peerNumber = ipNumber(peer), hostMask = (2 ** (32 - prefix) - 1) >>> 0;
+    if (sourceNumber === peerNumber) throw new Error('本实验的本机和对端 IP 需要不同。');
+    for (const address of [sourceNumber, peerNumber]) {
+      const host = address & hostMask;
+      if (host === 0 || host === hostMask) throw new Error('请填写此子网内可用的主机地址，不能使用网络地址或广播地址。');
+    }
+    const config = {text, sourceIp, peerIp, prefix, sourcePort, peerPort, ready, scenario,
+      disabledReason: String(options.disabledReason || '设备树或驱动尚未让网口就绪')};
+    const r = recorder(), rx = [], packet = buildPacket(sent, source, peer, sourcePort, peerPort, localMac, remoteMac);
+    const arpRequest = arpPacket(false, source, peer), arpReply = arpPacket(true, source, peer);
+    let replyPacket = null, outcome;
+    const emit = (key, stage, title, detail, body, label) => r.add(key, stage, title, detail, body, label, {bytes: {tx: sent.slice(), rx: rx.slice()}});
+    function finish() {
+      emit('complete', 'complete', outcome.title, outcome.detail,
+        '本地已发完：' + r.state.localDone + '\n对端应用收到：' + r.state.peerReceived + '\n本端收到业务回显：' + r.state.replyReceived, '这三件事各有自己的时刻');
+      return freeze({kind: 'network', config, steps: r.steps, outcome, sent: sent.slice(), returned: rx.slice(), packet, replyPacket, arpRequest, arpReply,
+        limits: networkLimits.slice(), sources: networkSources.map(source => ({...source}))});
+    }
+    emit('socket', 'software', '应用准备一次 UDP 发送', '程序创建 UDP socket 并绑定本地端口，调用 sendto。IP 用来找到主机，端口用来找到那台主机上的应用。',
+      sourceIp + ':' + sourcePort + ' → ' + peerIp + ':' + peerPort + '\n文本：' + text + '\nUTF-8：' + hex(sent), '应用消息');
+    if (!ready) {
+      emit('device-unavailable', 'driver', '网卡尚未注册或系统尚未运行', config.disabledReason + '。先解决开机、设备树和驱动，再设置网口地址。', '本次没有产生网络帧。', '设备未就绪');
+      outcome = {ok: false, code: 'unavailable', title: '网口未就绪，发送没有开始', detail: config.disabledReason};
+      return finish();
+    }
+    emit('route', 'kernel', '内核按目的 IP 选择路由', '本实验只配置一个直连子网，没有默认网关。相同子网才直接解析对端 MAC。',
+      '本机 ' + sourceIp + '/' + prefix + '\n目的 ' + peerIp + '\n默认网关：未配置', '路由判断');
+    if (((sourceNumber & ~hostMask) >>> 0) !== ((peerNumber & ~hostMask) >>> 0)) {
+      outcome = {ok: false, code: 'route', title: '目的地址不在直连子网，且没有网关', detail: '路由阶段停止；没有发 ARP 请求，也没有业务数据离开网口。修改地址/前缀，或在真实系统配置正确网关。'};
+      return finish();
+    }
+    emit('carrier', 'driver', scenario === 'cable' ? 'PHY 报告链路未建立' : '驱动确认网口链路已经建立', 'MAC 处理以太网帧；PHY 负责实际物理连接、链路协商和线路信号。两者分工不同。',
+      scenario === 'cable' ? 'carrier = 0\n本实验没有可用链路。' : 'carrier = 1\n以太网物理链路已建立。', '链路状态');
+    if (scenario === 'cable') {
+      outcome = {ok: false, code: 'cable', title: '链路未建立，帧没有到达对端', detail: '本实验在链路检查处停止。真实系统可能先排队，再因邻居解析或超时失败；sendto 返回不代表对端收到。'};
+      return finish();
+    }
+    emit('arp-request', 'wire', 'ARP 广播：这个 IP 的 MAC 是多少', 'ARP 缓存为空。内核发广播询问目的 IP 对应的局域网硬件地址；ARP 本身直接装在以太网帧中，不是 UDP 数据。',
+      'Who has ' + peerIp + '? Tell ' + sourceIp + '\n\n' + hex(arpRequest), 'ARP 请求：EtherType 0x0806');
+    if (scenario === 'arp') {
+      emit('arp-missing', 'kernel', '没有收到 ARP 回答', '不知道目标 MAC 时，本次业务 UDP 数据留在等待邻居解析的路径中。这里不模拟真实重试次数和超时长度。', '邻居未解析；业务 UDP 帧尚未发送。', '地址解析失败');
+      outcome = {ok: false, code: 'arp', title: '找不到对端 MAC，业务数据还没发出', detail: '检查对端 IP、链路和设备是否在线。不能仅凭 ARP 无回答判断究竟是哪一项出错。'};
+      return finish();
+    }
+    emit('arp-reply', 'return', '对端回答自己的 MAC 地址', '本机把 IP→MAC 对应关系记入邻居表。这个 ARP 回答只解决寻址，不表示 UDP 应用收到数据。',
+      peerIp + ' → 02:00:00:00:00:20\n\n' + hex(arpReply), 'ARP 回答');
+    emit('encapsulate', 'kernel', '套上 UDP、IPv4、以太网头', 'UDP 加端口，IPv4 加主机地址，Ethernet 加局域网 MAC。IP 校验和只保护 IP 头；UDP 校验和覆盖伪首部、UDP 头和数据。', packetText(packet), '即将交给网卡的字节（无填充/FCS）');
+    emit('driver', 'driver', '网卡驱动提交发送缓冲区', '网络栈把包交给设备驱动；驱动准备发送描述符，让 DMA/MAC 可以取得数据。此时还不能保证线上发送或远端接收。',
+      '发送缓冲区 ' + packet.bytes.length + ' 字节\n' + hex(packet.bytes), '示例驱动发送描述符');
+    emit('mac', 'controller', 'DMA/MAC 取得包并准备以太网帧', 'MAC 负责帧边界等链路层工作；实际发送还会补齐最小帧并附 FCS。此视图未显示补齐、前导码或 FCS。',
+      'Ethernet II + IPv4 + UDP + DATA\n' + hex(packet.bytes), 'MAC 输入字节');
+    emit('phy', 'wire', 'PHY 把帧送上物理链路', 'MAC 的数字接口交给 PHY，PHY 进行线路编码和物理信号发送。网线上的波形不是直接显示的 0x45 等十六进制字节。',
+      '本机 MAC → PHY → 网线 → 对端 PHY → MAC', '物理传输路径');
+    r.state.localDone = true;
+    emit('txdone', 'driver', '驱动处理本地发送完成', '网卡报告本地发送完成，驱动回收发送资源。这不依赖 UDP 对端 ACK；UDP 没有这种内建确认。', '本地发送缓冲区可回收；业务回复尚未到达。', '本地完成');
+    emit('peer-ethernet', 'peer', '对端 MAC 接收帧并交给驱动', '假定本次线路无错误，MAC 校验和接收通过，再由驱动交给网络栈。EtherType 0x0800 使接收路径进入 IPv4。',
+      hex(packet.ethernet) + '\n目的 MAC 匹配；EtherType=0x0800', '去掉 Ethernet 头');
+    const actualIp = packet.bytes.slice(14, 34), actualUdp = packet.bytes.slice(34), actualPayload = actualUdp.slice(8, readWord(actualUdp, 4));
+    const actualPseudo = [...actualIp.slice(12, 20), 0, actualIp[9], ...word(actualUdp.length)];
+    if (checksum(actualIp) !== 0 || checksum([...actualPseudo, ...actualUdp]) !== 0) throw new Error('内部报文校验错误。');
+    emit('peer-ip', 'peer', 'IPv4 核对目的地址与头部校验', '接收路径检查 IPv4 头并按 Protocol=17 交给 UDP；UDP 核对长度、校验和，再按目的端口寻找 socket。',
+      'IPv4 checksum：通过\nProtocol：17（UDP）\nUDP checksum：通过\n目的端口：' + readWord(actualUdp, 2), '接收端实际解析结果');
+    if (scenario === 'port') {
+      emit('port-unreachable', 'peer', '目的端口没有应用监听', '数据已经到达对端网络栈，但没有匹配的 UDP 接收 socket。对端应用没有收到这些字节。', 'UDP dst=' + peerPort + '\n无监听 socket', '端口分发失败');
+      emit('icmp', 'return', '对端返回 ICMP：端口不可达', '本场景假定 ICMP 未被过滤。ICMP Type=3、Code=3 是网络错误通知，不是 UDP 业务 echo，也不是成功确认。', 'ICMP Type 3 / Code 3\nPort Unreachable\n未展开此错误报文的全部字节。', '错误反馈');
+      outcome = {ok: false, code: 'port', title: '数据到达对端，但端口无人接收', detail: '本地已发送；对端没有相应 UDP 应用。本实验观察到 ICMP 端口不可达，实际是否向应用报告及何时报告取决于 socket 与系统配置。'};
+      return finish();
+    }
+    r.state.peerReceived = true;
+    emit('peer-app', 'peer', '对端 recvfrom 拿到业务数据', '目的端口对应的应用取到了 UDP payload。各层协议头已经由网络栈处理，不会一起作为普通业务内容交给应用。',
+      '源地址 ' + sourceIp + ':' + sourcePort + '\n数据 ' + hex(actualPayload), '对端应用收到的 payload');
+    if (scenario === 'no-reply') {
+      outcome = {ok: false, code: 'no-reply', title: '对端收到了，但没有业务回复', detail: 'UDP 不会自动回 ACK。对端程序没有执行 echo，本端等待窗口内没有回复；不能把“未回复”直接解释为“未收到”。'};
+      return finish();
+    }
+    replyPacket = buildPacket(actualPayload, peer, source, peerPort, sourcePort, remoteMac, localMac);
+    emit('echo', 'return', '对端应用发回一份 UDP echo', '这是对端应用主动调用 sendto 的新报文。源/目的 IP、端口和 MAC 对调；校验和按这份新报文重新计算。', packetText(replyPacket), '业务回复包（无填充/FCS）');
+    emit('receive', 'kernel', '本机驱动和网络栈解析回复', '反向帧经过 PHY/MAC、驱动、IPv4、UDP 后，到达本地端口的接收队列。为方便阅读，这里把反向硬件流程合并成一步。',
+      peerIp + ':' + peerPort + ' → ' + sourceIp + ':' + sourcePort, '本机 UDP 接收队列');
+    rx.push(...replyPacket.bytes.slice(42));
+    r.state.replyReceived = true;
+    emit('recvfrom', 'software', '本机 recvfrom 读到业务回显', '应用比较回显内容，判断本次约定的往返是否成功。UDP 层本身仍不提供可靠交付保证。', hex(rx), '应用取回的 payload');
+    outcome = {ok: same(rx, sent), code: 'success', title: 'UDP 业务回显往返成功', detail: '本地发送完成、对端应用接收、本端收到 echo 是三个独立事件。成功来自本次业务交互，不是 UDP 内建 ACK。'};
+    return finish();
+  }
+  return {serial, network};
+});
+</script><script>/* The GUI observes models; it never executes shell commands or accesses hardware. */
+(()=>{
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const node=(tag,text)=>{const e=document.createElement(tag);if(text!=null)e.textContent=text;return e;};
+ const hex=values=>(values||[]).map(v=>v.toString(16).toUpperCase().padStart(2,'0')).join(' ')||'—';
+ const defaults={scenario:'success',uartEnabled:true,uartDriver:true,uartCompatible:true,ethEnabled:true,ethDriver:true,ethCompatible:true};
+ const state={tab:'boot',run:null,index:0,timer:null,bootRun:null,bootIndex:0,bootConfig:{...defaults},configs:{},dirty:false,field:0,console:[]};
+ const treeFields={uartEnabled:'dt-uart-enabled',uartCompatible:'dt-uart-compatible',uartDriver:'dt-uart-driver',ethEnabled:'dt-eth-enabled',ethCompatible:'dt-eth-compatible',ethDriver:'dt-eth-driver'};
+ const stageNames={rom:['BootROM','芯片里的第一段代码'],spl:['SPL','准备大内存'],uboot:['U-Boot','装入系统并交接'],kernel:['Linux 内核','接管与初始化'],drivers:['设备驱动','把硬件变成接口'],userspace:['用户空间','运行应用'],software:['应用','准备要发的消息'],driver:['设备驱动','交给具体硬件'],controller:['控制器','组织实际传输'],wire:['连线','信号到达对端'],peer:['对端','还原并交给应用'],return:['业务回复','对端另发一条消息'],complete:['本次结果','分别判断收发状态']};
+ const guides={
+  boot:{title:'先记住这三句话',items:[['U-Boot 先运行','把内核和硬件描述装入内存，再把执行权交出去。'],['Linux 自己管理硬件','它使用自己的设备树与驱动；U-Boot 能用串口，不代表 Linux 也能用。'],['根文件系统提供程序','内核起来之后，还要找到 init、库和应用，才能运行你的通信程序。']]},
+  tree:{title:'分清三个角色',items:[['设备树 = 硬件说明','有哪些设备、地址在哪里、设备是否启用。'],['驱动 = 操作方法','按硬件规则配置寄存器、收发数据、报告状态。'],['设备节点 = 应用入口','例如串口 /dev/ttyS0；eth0 是网络接口，通过 socket 使用。']]},
+  serial:{title:'串口最容易混淆的事',items:[['接线','发送端 TX 接对端 RX，逻辑电平串口通常还需要共地。'],['约定','双方约好波特率与帧格式；本实验使用 8N1。'],['完成和回复','本地发送完不证明对方收到了。这里另约定对端应用把数据发回来，称为 echo。']]},
+  network:{title:'一条消息穿过四层',items:[['UDP 端口','把数据交给对端正在监听的应用。'],['IP 地址','判断要送到哪台主机；本实验只演示同一局域网。'],['MAC 与 PHY','MAC 处理以太网帧，PHY 处理适合网线传输的信号。它们各有分工。']]}
+ };
+ function boardState(){return state.bootRun.steps[state.bootIndex].state;}
+ function stop(){if(state.timer)clearInterval(state.timer);state.timer=null;$('play').textContent='▶ 播放';}
+ function raw(){return Object.fromEntries(new FormData($('config-form')).entries());}
+ function field(name,label,value,options,kind='text'){
+  const wrap=node('label',label),input=node(options?'select':'input');input.name=name;input.id='config-'+name;
+  if(options)for(const [v,text] of options){const option=node('option',text);option.value=v;input.append(option);}
+  else {input.type=kind;input.autocomplete='off';if(name==='text')input.maxLength=128;}
+  input.value=value;wrap.append(input);if(name==='text')wrap.className='message-input';$('config-form').append(wrap);
+ }
+ function configure(){
+  $('config-form').replaceChildren();
+  if(state.tab==='boot'){
+   $('experiment-title').textContent='模拟一次上电启动';$('experiment-kicker').textContent='BOOT / 从芯片到应用';$('experiment-tag').textContent='ARM64 风格教学板';
+   field('scenario','这次想观察什么',state.bootConfig.scenario,[['success','正常启动（使用已应用的设备树）'],['kernel-missing','找不到内核 Image'],['dtb-invalid','DTB 二进制格式损坏'],['rootfs-missing','内核起来，但找不到根文件系统']]);
+   $('config-note').textContent='选择场景后重新上电。设备树与驱动选项在“设备树与驱动”页面修改。';
+  }else if(state.tab==='serial'){
+   $('experiment-title').textContent='向对端发送一条串口消息';$('experiment-kicker').textContent='UART / 从 write 到对端 read';$('experiment-tag').textContent='逻辑电平 · 8N1';
+   field('text','发送文本（UTF-8，最多 32 字节）','Hello');
+   const rates=[['9600','9,600'],['90000','90,000'],['100000','100,000'],['115200','115,200']];
+   field('baud','本端波特率','115200',rates);field('peerBaud','对端波特率','115200',rates);
+   field('scenario','实验场景','success',[['success','对端收到后原样回复'],['crossed-wrong','接错线：TX 没有接到对端 RX'],['no-reply','对端收到，但应用没有回复']]);
+   $('config-note').textContent='先启动 Linux 并启用串口驱动。write 入队、本地发送结束、对端接收和应用回复是不同的时刻。';
+  }else{
+   $('experiment-title').textContent='通过网口发送一条 UDP 消息';$('experiment-kicker').textContent='ETHERNET / 应用 → 内核 → MAC → PHY';$('experiment-tag').textContent='静态 IPv4 · 同一局域网';
+   field('text','发送文本（UTF-8，最多 32 字节）','Hello');field('sourceIp','本机 IP /24','192.168.1.10');field('peerIp','对端 IP /24','192.168.1.20');field('peerPort','对端 UDP 端口','9000',null,'number');
+   field('scenario','实验场景','success',[['success','对端监听并原样回复'],['cable','网线未连接'],['arp','对端没有应答 ARP'],['port','对端端口没有程序监听'],['no-reply','对端收到，但应用没有回复']]);
+   $('config-note').textContent='本实验不配置网关；两个地址须在同一个 /24 子网。本机端口 40000。UDP 自身没有接收确认，这里约定应用 echo。';
+  }
+  if(state.tab!=='boot')for(const [key,value] of Object.entries(state.configs[state.tab]||{})){const input=$('config-'+key);if(input)input.value=value;}
+  const button=node('button',state.tab==='boot'?'模拟上电 / 重置':'生成 / 重置');button.type='submit';button.className='primary';$('config-form').append(button);
+ }
+ function build(){
+  stop();const config=raw();
+  try{
+   if(state.tab==='boot'){
+    state.bootConfig={...state.bootConfig,scenario:config.scenario};state.bootRun=EmbeddedBoot.build(state.bootConfig);state.bootIndex=0;state.run=state.bootRun;state.console=[];
+   }else{
+    const b=boardState(),device=state.tab==='serial'?'uart':'eth';
+    const ready=b.userspaceReady&&b[device+'Ready'];
+    const disabledReason=!b.userspaceReady?'Linux 用户空间尚未就绪，无法运行通信应用；请先完成启动。':b[device+'Reason'];
+    state.run=state.tab==='serial'?EmbeddedComms.serial({...config,baud:Number(config.baud),peerBaud:Number(config.peerBaud),ready,disabledReason}):EmbeddedComms.network({...config,peerPort:Number(config.peerPort),sourcePort:40000,prefix:24,ready,disabledReason});
+    state.configs[state.tab]=config;
+   }
+   state.index=0;state.field=0;state.dirty=false;$('validation').hidden=true;
+   setupRun();select(0);
+  }catch(error){state.dirty=true;$('validation').textContent=error.message;$('validation').hidden=false;}
+ }
+ function setupRun(){
+  $('seek').max=state.run.steps.length-1;$('flow-title').textContent=state.tab==='boot'?'一次启动经过哪些地方':'一条消息经过哪些地方';
+  const order=state.tab==='boot'?['rom','spl','uboot','kernel','drivers','userspace']:['software','kernel','driver','controller','wire','peer','return','complete'];
+  const stages=order.filter(stage=>state.run.steps.some(step=>step.stage===stage));$('stages').replaceChildren();
+  for(const stage of stages){let entry=stageNames[stage]||[stage,''];if(stage==='kernel'&&state.tab!=='boot')entry=['Linux 协议层',state.tab==='serial'?'TTY 管理字节流':'网络栈处理报文'];if(stage==='return'&&state.tab==='network')entry=['返回路径','ARP / ICMP / 业务回显'];const button=node('button');button.dataset.stage=stage;button.append(node('b',entry[0]),node('small',entry[1]));button.onclick=()=>{stop();select(state.run.steps.findIndex(step=>step.stage===stage));};$('stages').append(button);}
+  $('uboot-panel').hidden=state.tab!=='boot';$('serial-panel').hidden=state.tab!=='serial';$('packet-panel').hidden=state.tab!=='network';$('transfer-status').hidden=state.tab==='boot';
+  $('first-byte').hidden=state.tab!=='serial';$('first-byte').disabled=!state.run.steps.some(step=>step.bytes?.peer?.length);
+  $('boot-required').hidden=state.tab==='boot'||boardState().userspaceReady;
+  renderGuide();renderPacket();
+ }
+ function renderGuide(){
+  const guide=guides[state.tab];$('learn-title').textContent=guide.title;
+  $('learn-content').replaceChildren(...guide.items.map(([title,text])=>{const p=node('p');p.append(node('b',title),document.createTextNode(text));return p;}));
+  const source=state.tab==='tree'?state.bootRun:state.run;
+  const list=node('ul');for(const limit of source.limits||[])list.append(node('li',limit));$('limitations').replaceChildren(list);
+  $('sources').replaceChildren(...(source.sources||[]).map(item=>{const a=node('a',item.title);a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';return a;}));
+ }
+ function select(index){
+  state.index=Math.max(0,Math.min(state.run.steps.length-1,Number(index)));
+  if(state.tab==='boot')state.bootIndex=state.index;
+  const step=state.run.steps[state.index],last=state.index===state.run.steps.length-1;
+  $('position').textContent=`${state.index+1} / ${state.run.steps.length}`;$('seek').value=state.index;$('previous').disabled=state.index===0;$('next').disabled=last;
+  $('event').replaceChildren(node('h3',step.title),node('p',step.detail));
+  $('logs').textContent=(step.logs||[]).join('\n')||'等待本次实验开始…';$('logs').scrollTop=$('logs').scrollHeight;
+  $('data-label').textContent=step.data?.label||'此刻交接的数据';$('data-body').textContent=step.data?.body||'尚未交接数据。';
+  document.querySelectorAll('[data-stage]').forEach(button=>{button.classList.toggle('active',button.dataset.stage===step.stage);button.classList.toggle('past',state.run.steps.slice(0,state.index).some(s=>s.stage===button.dataset.stage));});
+  $('result').hidden=!last;$('result').classList.toggle('bad',!state.run.outcome.ok);
+  if(last)$('result').replaceChildren(node('strong',state.run.outcome.title),node('p',state.run.outcome.detail));
+  if(state.tab!=='boot')for(const [key,id] of [['localDone','local-done'],['peerReceived','peer-received'],['replyReceived','reply-received']]){$(id).textContent=step.state[key]?'已完成':'尚未';$(id).classList.toggle('good',!!step.state[key]);}
+  renderBoard();if(state.tab==='boot')renderConsole();if(state.tab==='serial')renderSerial(step);
+ }
+ function renderBoard(){
+  const s=boardState();$('board-system').textContent=s.halted?(s.linuxRunning?'内核启动受阻':'停在启动程序'):s.userspaceReady?'Linux 应用可运行':s.linuxRunning?'内核初始化中':state.bootIndex===0?'上电 / BootROM':stageNames[s.bootStage][0];
+  for(const [kind,id] of [['uart','serial'],['eth','network']]){
+   const ready=s[kind+'Ready'],text=ready?'驱动就绪':s[kind+'Reason'].includes('尚未')?'尚未初始化':'不可用';
+   $('board-'+id+'-status').textContent=text;$('board-'+id+'-status').title=s[kind+'Reason'];
+   $('board-'+kind).classList.toggle('ready',ready);$('board-'+kind).classList.toggle('failed',!ready&&text==='不可用');
+  }
+ }
+ function play(){if(state.timer){stop();return;}if(state.dirty){build();if(state.dirty)return;}if(state.index===state.run.steps.length-1)select(0);$('play').textContent='Ⅱ 暂停';state.timer=setInterval(()=>{select(state.index+1);if(state.index===state.run.steps.length-1)stop();},Number($('speed').value));}
+ function switchTab(tab){
+  stop();state.tab=tab;state.dirty=false;$('validation').hidden=true;
+  document.querySelectorAll('[data-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.tab===tab)));
+  $('tree-view').hidden=tab!=='tree';$('experiment-view').hidden=tab==='tree';
+  if(tab==='tree'){renderTree();renderGuide();return;}
+  configure();if(tab==='boot'){state.run=state.bootRun;setupRun();select(state.bootIndex);}else build();
+ }
+ function treeDraft(){const config={...state.bootConfig};for(const [key,id] of Object.entries(treeFields))config[key]=$(id).value==='true';return config;}
+ function renderTree(){const config=treeDraft();$('dts-preview').textContent=EmbeddedBoot.deviceTree(config);$('tree-dirty').textContent=Object.keys(treeFields).some(key=>config[key]!==state.bootConfig[key])?'草稿有变化，重新启动后生效':'草稿与启动配置一致';}
+ function renderConsole(){
+  const step=state.run.steps[state.index],available=step.stage==='uboot'&&!step.state.linuxRunning;
+  $('uboot-command').disabled=!available;document.querySelector('#uboot-form button').disabled=!available;
+  $('uboot-output').textContent=state.console.length?state.console.join('\n'):available?'U-Boot 教学控制台已就绪。输入 help 查看演示命令。':'等待进入 U-Boot；Linux 启动后需要重新进入启动阶段。';
+  $('uboot-output').scrollTop=$('uboot-output').scrollHeight;
+ }
+ function executeConsole(event){
+  event.preventDefault();if($('uboot-command').disabled)return;
+  const cmd=$('uboot-command').value.trim();$('uboot-command').value='';if(!cmd)return;state.console.push('=> '+cmd);
+  if(cmd==='help')state.console.push('help                 查看本地演示命令\nprintenv             查看启动参数\nprintenv bootargs     查看传给 Linux 的参数\nprintenv bootcmd      查看交接命令\nboot                 继续当前启动场景');
+  else if(cmd==='printenv'||cmd==='printenv bootargs'||cmd==='printenv bootcmd'){
+   if(cmd!=='printenv bootcmd')state.console.push('bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait rw');
+   if(cmd!=='printenv bootargs')state.console.push('bootcmd=load mmc 0:1 ${kernel_addr_r} Image && load mmc 0:1 ${fdt_addr_r} board.dtb && booti ${kernel_addr_r} - ${fdt_addr_r}\n（启动脚本预览：执行时先加载 Image 与 DTB，再交出执行权；地址来自板级配置）');
+  }else if(cmd==='boot'){
+   state.console.push('继续当前教学启动路径…');
+   if(state.index===state.run.steps.length-1)state.console.push('当前场景仍存在加载故障。需要修正启动配置，再重新上电。');else if(!state.timer)play();
+  }else state.console.push('本演示没有实现该命令。输入 help 查看支持的命令；不会执行真实 shell。');
+  state.console=state.console.slice(-40);renderConsole();
+ }
+ function renderSerial(step){
+  $('serial-tx').textContent=hex(step.bytes?.tx);$('serial-rx').textContent=hex(step.bytes?.peer);$('serial-reply').textContent=hex(step.bytes?.rx);
+  const root=$('serial-wave');root.replaceChildren();const signals=step.signals?.length?step.signals:[{name:'TX → 对端 RX',bits:'1'}];
+  const count=Math.max(...signals.map(s=>s.bits.length),16),width=Math.max(650,count*19+110),height=signals.length*130,left=70,dx=(width-left-20)/count;
+  root.setAttribute('viewBox',`0 0 ${width} ${height}`);root.style.width=width+'px';root.style.height=height+'px';
+  const svg=(tag,attrs,text)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attrs))e.setAttribute(key,value);if(text!=null)e.textContent=text;return e;};
+  signals.forEach((signal,row)=>{
+   const bits=signal.bits||'1',top=row*130,y=value=>top+(String(value)==='1'?40:80);
+   root.append(svg('text',{x:10,y:top+17,fill:'#537783','font-size':10},signal.name),svg('text',{x:20,y:top+44,fill:'#71899b','font-size':10},'1'),svg('text',{x:20,y:top+84,fill:'#71899b','font-size':10},'0'));
+   let d=`M ${left} ${y(bits[0])}`;for(let i=0;i<bits.length;i++){d+=` H ${left+i*dx} V ${y(bits[i])} H ${left+(i+1)*dx}`;if(i%10===1)root.append(svg('line',{x1:left+i*dx,x2:left+i*dx,y1:top+25,y2:top+90,stroke:'#cddce4','stroke-dasharray':'3 4'}));if(dx>13)root.append(svg('text',{x:left+(i+.5)*dx,y:top+110,'text-anchor':'middle',fill:'#71899b','font-size':9},bits[i]));}
+   root.append(svg('path',{d,fill:'none',stroke:row?'#3774ab':'#087e83','stroke-width':2}));
+   if(row===0)for(const event of state.run.steps.slice(0,state.index+1)){if(event.sample&&Number.isFinite(event.timeUs)){const x=left+(1+event.timeUs*state.run.config.baud/1e6)*dx;if(x<=width-20)root.append(svg('circle',{cx:x,cy:y(event.sample.value),r:2.8,fill:'#bd8627'}));}}
+  });
+  root.parentElement.scrollLeft=Math.max(0,width-root.parentElement.clientWidth);
+ }
+ function renderPacket(){
+  if(state.tab!=='network')return;const packet=state.run.packet;$('packet-fields').replaceChildren();$('packet-bytes').replaceChildren();
+  if(!packet){$('packet-detail').textContent='当前实验未构造请求报文。';return;}
+  const fields=packet.fields||[];state.field=Math.min(state.field,Math.max(0,fields.length-1));
+  fields.forEach((field,index)=>{const button=node('button',field.name);button.classList.toggle('active',index===state.field);button.onclick=()=>{state.field=index;renderPacket();};$('packet-fields').append(button);});
+  const selected=fields[state.field];(packet.bytes||[]).forEach((value,index)=>{const button=node('button');button.append(node('small',index.toString(16).toUpperCase().padStart(2,'0')),document.createTextNode(hex([value])));button.classList.toggle('highlight',!!selected&&index>=selected.start&&index<selected.end);button.setAttribute('aria-label',`偏移 ${index}，值 ${hex([value])}`);button.onclick=()=>{const match=fields.findIndex(f=>index>=f.start&&index<f.end);if(match>=0){state.field=match;renderPacket();}$('packet-detail').textContent=`偏移 ${index} · 0x${hex([value])} · ${fields[match]?.name||'原始字节'}：${fields[match]?.detail||''}`;};$('packet-bytes').append(button);});
+  $('packet-detail').textContent=selected?`${selected.name} · 字节偏移 ${selected.start}–${selected.end-1}：${selected.detail}`:'尚无字段信息。';
+ }
+ function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type})),a=node('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>switchTab(button.dataset.tab));
+ $('config-form').onsubmit=e=>{e.preventDefault();build();};$('config-form').oninput=()=>{stop();state.dirty=true;$('config-note').textContent='参数已修改；当前画面仍是上一次实验。点击生成或模拟上电，应用这次修改。';};
+ $('play').onclick=play;$('previous').onclick=()=>{stop();select(state.index-1);};$('next').onclick=()=>{stop();select(state.index+1);};$('reset').onclick=()=>{stop();select(0);};$('finish').onclick=()=>{stop();select(state.run.steps.length-1);};$('seek').oninput=()=>{stop();select($('seek').value);};$('speed').onchange=()=>{if(state.timer){stop();play();}};
+ $('first-byte').onclick=()=>{stop();const index=state.run.steps.findIndex(step=>step.bytes?.peer?.length);if(index>=0)select(index);};
+ $('go-boot').onclick=()=>switchTab('boot');$('quick-boot').onclick=()=>{if(state.tab==='boot')build();else switchTab('boot');select(state.run.steps.length-1);};
+ $('tree-form').oninput=renderTree;$('tree-form').onsubmit=e=>{e.preventDefault();stop();state.bootConfig=treeDraft();state.bootRun=EmbeddedBoot.build(state.bootConfig);state.bootIndex=0;state.console=[];switchTab('boot');play();};
+ $('dt-restore').onclick=()=>{for(const id of Object.values(treeFields))$(id).value='true';renderTree();};
+ $('download-dts').onclick=()=>download('study-virtual-board.dts',EmbeddedBoot.deviceTree(treeDraft()),'text/plain;charset=utf-8');
+ $('enter-uboot').onclick=()=>{stop();select(state.run.steps.findIndex(step=>step.stage==='uboot'));$('uboot-command').focus();};$('uboot-form').onsubmit=executeConsole;
+ $('export').onclick=()=>download('embedded-'+state.tab+'-trace.json',JSON.stringify({description:'离线教学模型，非硬件运行记录',tab:state.tab,currentStep:state.tab==='tree'?state.bootIndex:state.index,board:boardState(),draft:state.tab==='tree'?treeDraft():undefined,simulation:state.tab==='tree'?state.bootRun:state.run},null,2),'application/json');
+ state.bootRun=EmbeddedBoot.build(defaults);state.run=state.bootRun;configure();setupRun();select(0);
+})();
+</script>
+</body></html>

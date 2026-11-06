@@ -1,0 +1,41 @@
+/dts-v1/;
+
+/* 虚拟教学硬件：study,*、地址与引脚均不对应真实板卡。
+ * 此片段只解释硬件描述；不是可在实体板启动的完整设备树。
+ * 实际项目必须使用板级 DTS、真实 bindings、时钟/中断/引脚等资源。
+ */
+/ {
+    model = "Study virtual board";
+    compatible = "study,virtual-board";
+    #address-cells = <2>;
+    #size-cells = <2>;
+
+    aliases { serial0 = &uart0; ethernet0 = &eth0; };
+    chosen {
+        stdout-path = "serial0:115200n8";
+        bootargs = "console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait rw";
+    };
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x0 0x80000000 0x0 0x20000000>;
+    };
+
+    soc {
+        compatible = "simple-bus";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        uart0: serial@10000000 {
+            compatible = "study,uart";
+            reg = <0x0 0x10000000 0x0 0x1000>;
+            status = "okay";
+        };
+
+        eth0: ethernet@10010000 {
+            compatible = "study,ethernet";
+            reg = <0x0 0x10010000 0x0 0x1000>;
+            status = "okay";
+        };
+    };
+};

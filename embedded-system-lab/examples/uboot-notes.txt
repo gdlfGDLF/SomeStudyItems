@@ -1,0 +1,41 @@
+U-Boot：把 Linux 启动所需的东西准备好
+====================================
+
+这是一份阅读练习，不是适用于任意板卡的启动脚本。
+浏览器中的开机日志由教学模型生成，没有操作真实固件。
+
+先分清三样东西：
+  Image：ARM64 Linux 内核镜像的一种常见形式。
+  .dtb：二进制设备树，描述这块板上有什么硬件及资源。
+  bootargs：传给 Linux 的启动参数，例如控制台和根文件系统位置。
+
+进入已有板卡的 U-Boot 提示符后，可以先只读查看：
+  version
+  printenv bootcmd bootargs kernel_addr_r fdt_addr_r
+  bdinfo
+
+观察什么：
+  bootcmd 是自动启动会执行的命令。
+  kernel_addr_r / fdt_addr_r 是很多板级配置用于装载镜像和 DTB 的 RAM 地址变量。
+  这些变量不是每块板都存在，地址也不能照搬别的板卡。
+  bootargs 中 console= 指 Linux 的控制台，不代表 U-Boot 自己一定用同一套驱动。
+
+下面只解释一种 boot 流程，不要在未核对板卡配置时执行：
+  1. 使用板卡原有启动介质和加载方式，把兼容的 Image 加载到 ${kernel_addr_r}。
+  2. 把这块板对应的 DTB 加载到 ${fdt_addr_r}。
+  3. 核对内存区域不冲突、镜像架构正确、根文件系统及启动参数正确。
+  4. 对支持 booti 的 Image 启动方式，可见类似命令：
+       booti ${kernel_addr_r} - ${fdt_addr_r}
+
+其中 '-' 表示这条命令没有传入独立 initrd；并不表示 Linux 不需要根文件系统。
+booti 会把控制权交给内核，正常情况下不返回到 U-Boot 提示符。
+其他板卡或镜像格式可能使用 bootm、bootz、EFI 或 FIT，不能通用替换。
+
+常见故障分层：
+  镜像没有加载：还在 U-Boot 阶段。
+  DTB 无效或不适配：可能在启动检查或内核早期初始化失败。
+  内核已开始但挂载根文件系统失败：已经进入 Linux，不能笼统归因于 U-Boot。
+  U-Boot 有串口输出、Linux 没输出：检查 Linux 控制台参数、驱动、设备树与硬件资源。
+
+本文没有持久化环境、擦除或烧写操作。
+官方参考：https://docs.u-boot.org/en/latest/usage/cmd/booti.html

@@ -1,0 +1,38 @@
+设备树：描述硬件，供驱动读取
+==========================
+
+可读的 DTS 源码 --dtc 编译--> 二进制 DTB --启动程序传递--> Linux
+
+如果主机已经安装 Device Tree Compiler，可以对一个经过确认的示例做编译练习：
+  dtc -I dts -O dtb -o board.dtb board.dts
+反向阅读 DTB：
+  dtc -I dtb -O dts -o decoded.dts board.dtb
+
+编译成功只证明能生成这种格式，不证明地址、时钟、中断或驱动适合真实板卡。
+真实内核通常还需要用对应的 schema/binding 做校验，并实际验证硬件。
+
+三个常见属性：
+  status = "okay"：在相应设备枚举路径中允许使用这个节点。
+  status = "disabled"：描述仍在，但该设备通常不会按可用设备实例化。
+  compatible = "厂商,设备型号"：供系统/驱动匹配表识别硬件类型。
+  reg：地址和长度等资源，其解释由父总线的地址格式及 binding 决定。
+
+真实驱动不是由字符串自动生成的。驱动需存在于内核或可加载模块中，
+匹配成功后还需要 probe 正确取得时钟、中断、引脚、复位等资源。
+status=okay + compatible 匹配，并不保证真实 probe 一定成功。
+
+教学例子的逻辑：
+  节点被禁用 → 没有这个可用接口。
+  compatible 不匹配 → 找不到对应驱动。
+  驱动未提供 → 光有设备树也不能驱动硬件。
+  条件满足 → 教学模型认为接口可用；真实系统还有资源及硬件检查。
+
+本实验使用 study,uart、study,ethernet 等虚拟教学字符串及虚构地址，
+并未提供匹配它们的 Linux 内核驱动，也不是某款芯片的可用 binding。
+导出的 DTS 用于观察变化，不能直接替换真实板卡的 DTB。
+
+U-Boot 可以拥有自己的控制设备树，并加载或修改传给 Linux 的另一份 DTB；
+两者不一定是同一文件。修改 DTS 文件本身也不会自动修改当前运行中的设备树。
+通常需重新生成 DTB，并让实际启动流程加载它；本实验用“重新启动”展示这一点。
+
+官方参考：https://docs.kernel.org/devicetree/usage-model.html
