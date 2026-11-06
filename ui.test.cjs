@@ -1,0 +1,42 @@
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const fs=require('node:fs');
+const {pathToFileURL}=require('node:url');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+(async()=>{
+ const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+ const page=await browser.newPage({viewport:{width:1440,height:1200},deviceScaleFactor:1});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(pathToFileURL(path.join(__dirname,'通信实验室.html')).href);
+ await page.waitForSelector('#result .result-title');
+ const text=id=>page.locator('#'+id).innerText();
+ assert.match(await text('result'),/1500/);
+ assert.equal(await text('metric-rate'),'500 kbit/s');
+ assert.equal(await text('metric-bit'),'2 μs');
+ assert.equal(await text('metric-sample'),'80%');
+ await page.locator('#next').click();assert.match(await text('bit-position'),/位 2 /);
+ await page.locator('#play').click();await page.waitForTimeout(800);await page.locator('#play').click();assert.ok(parseInt((await text('bit-position')).match(/位 (\d+)/)[1])>2);
+ for(const [preset,expected] of [['stuff','success'],['noack','noack'],['filter','filtered'],['flip','crc'],['delay','timing'],['arbitration','success']]) {
+  await page.locator('#preset').selectOption(preset);assert.equal(await text('result-badge'),expected,preset);
+ }
+ assert.match(await text('arbitration'),/B 获胜/);
+ await page.locator('#can-id').fill('800');await page.locator('#build').click();assert.equal(await page.locator('#validation').isVisible(),true);
+ await page.locator('#preset').selectOption('normal');
+ await page.locator('#receiver').selectOption('listen');await page.locator('#build').click();assert.equal(await text('result-badge'),'noack');assert.match(await text('result'),/DC/);
+ await page.locator('#preset').selectOption('normal');await page.locator('#payload').fill('');await page.locator('#build').click();assert.equal(await text('result-badge'),'success');
+ await page.locator('#preset').selectOption('normal');await page.locator('#target').selectOption('250000');await page.locator('#calculate').click();await page.locator('#build').click();assert.equal(await text('metric-rate'),'250 kbit/s');
+ await page.locator('#target').selectOption('500000');await page.locator('#calculate').click();await page.locator('#build').click();
+ await page.locator('#tab-uart').click();assert.equal(await text('result-badge'),'success');
+ await page.locator('#payload').fill('00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F');await page.locator('#build').click();assert.equal(await page.locator('#validation').isVisible(),false);assert.equal(await text('metric-length'),'160 bit');
+ await page.locator('#preset').selectOption('drift');assert.notEqual(await text('result-badge'),'success');
+ await page.locator('#preset').selectOption('parity');assert.equal(await text('result-badge'),'success');assert.equal(await text('metric-length'),'22 bit');
+ await page.locator('#parity').selectOption('odd');await page.locator('#build').click();assert.equal(await text('result-badge'),'success');
+ const downloadPromise=page.waitForEvent('download');await page.locator('#export').click();const download=await downloadPromise;const downloaded=await download.path();const report=JSON.parse(fs.readFileSync(downloaded,'utf8'));assert.equal(report.protocol,'UART');assert.equal(report.result.parity,'odd');
+ await page.locator('#tab-can').click();
+ await page.screenshot({path:path.join(__dirname,'preview-desktop.png'),fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(100);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'mobile horizontal overflow');
+ await page.screenshot({path:path.join(__dirname,'preview-mobile.png'),fullPage:true});
+ assert.deepEqual(errors,[]);
+ await browser.close();console.log('UI checks passed: offline startup, playback, seven CAN presets, validation, ACK/listen/filter, empty CAN, bitrate calculations, UART 16-byte payload, drift/parity, JSON export, mobile layout.');
+})().catch(e=>{console.error(e);process.exit(1);});

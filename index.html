@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通信实验室 · CAN / UART</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>通信实验室</strong><small>PROTOCOL LAB / 01</small></div></div><span class="offline"><i></i> 本地离线 · 教学仿真</span><button id="export" class="subtle">导出本次实验</button></header>
+<main>
+<section class="intro"><div><span class="eyebrow">从一个字节，到总线上的每一位</span><h1>让通信过程看得见。</h1><p>自己发一帧，沿着电信号追踪数据，观察它如何被接收。</p></div><div class="protocol-tabs" role="group" aria-label="实验协议"><button id="tab-can" class="active" aria-pressed="true">CAN</button><button id="tab-uart" aria-pressed="false">UART</button></div></section>
+<div class="workspace">
+<aside class="panel settings">
+<div class="panel-heading"><h2>实验配置</h2><span id="format-label" class="badge">经典 CAN · 标准帧</span></div>
+<label>快速实验<select id="preset"><option value="normal">01 / 正常收发</option><option value="stuff">02 / 连续 0 与位填充</option><option value="noack">03 / 没有接收节点</option><option value="filter">04 / ACK 成功，但过滤掉</option><option value="flip">05 / 数据位受干扰</option><option value="delay">06 / 信号晚于采样点</option><option value="arbitration">07 / 两个节点同时发送</option></select></label>
+<div id="can-fields">
+<div class="two"><label>发送 ID（十六进制）<input id="can-id" value="200" spellcheck="false" maxlength="5"></label><label>竞争节点 ID（十六进制）<input id="other-id" value="300" spellcheck="false" maxlength="5" disabled></label></div>
+</div>
+<label>数据（十六进制字节）<textarea id="payload" rows="2" spellcheck="false">DC 05</textarea></label>
+<p class="hint" id="payload-hint">0–8 字节；DC 05 按小端无符号数解释为 1500。</p>
+<div id="can-timing">
+<div class="section-title">位时序 <span>更改参数，观察时间关系</span></div>
+<div class="two"><label>CAN 时钟 / MHz<input id="clock" type="number" min="1" max="1000" step="1" value="160"></label><label>目标位速率<select id="target"><option value="1000000">1 Mbit/s</option><option value="500000" selected>500 kbit/s</option><option value="250000">250 kbit/s</option><option value="125000">125 kbit/s</option></select></label></div>
+<div class="two"><label>目标采样点 / %<input id="sample-target" type="number" min="50" max="95" step="0.1" value="80"></label><button id="calculate" class="calculate">计算一组参数 ↗</button></div>
+<details><summary>手动设置分频与时间段</summary><div class="three"><label>实际分频<input id="brp" type="number" min="1" max="1024" value="16"></label><label>TSEG1 / TQ<input id="seg1" type="number" min="1" max="256" value="15"></label><label>TSEG2 / TQ<input id="seg2" type="number" min="1" max="128" value="4"></label></div><p class="hint">同步段固定为 1 TQ。这些是实际数量，不是寄存器编码；具体芯片支持范围可能不同。</p></details>
+<div class="formula" id="timing-formula"></div>
+<div class="section-title">接收条件</div>
+<label>接收节点<select id="receiver"><option value="normal">正常接收（参与 ACK）</option><option value="listen">只听模式（不发送 ACK）</option><option value="missing">无接收节点</option></select></label>
+<div class="two"><label>过滤 ID（十六进制）<input id="filter-id" placeholder="空白 = 接收全部" spellcheck="false"></label><label>相对边沿迟到 / ns<input id="delay" type="number" min="0" max="10000" step="50" value="200"></label></div>
+<label>故障注入<select id="fault"><option value="none">无故障</option><option value="bitflip">翻转一个线上数据位</option></select></label>
+</div>
+<div id="uart-fields" hidden><div class="two"><label>发送波特率<input id="baud" type="number" min="300" max="10000000" value="115200"></label><label>接收波特率<input id="rx-baud" type="number" min="300" max="10000000" value="115200"></label></div><label>帧格式<select id="parity"><option value="none">8N1 · 无校验</option><option value="even">8E1 · 偶校验</option><option value="odd">8O1 · 奇校验</option></select></label><p class="hint">UART 每字节独立起始同步，数据低位先发。显示 3.3 V 逻辑电平示意，不是 RS-232 电压。</p></div>
+<div id="validation" role="alert" hidden></div>
+<button id="build" class="primary full">生成实验 →</button><p class="hint config-hint" id="dirty">配置已应用。点击播放或选择任意一位。</p>
+</aside>
+<section class="experiment">
+<section class="panel pipeline-panel"><div class="panel-heading"><h2>完整数据流程</h2><span class="badge">点击步骤查看说明</span></div><div class="pipeline" id="pipeline"></div><div id="stage-detail" class="stage-detail" aria-live="polite"></div></section>
+<section class="panel scope-panel">
+<div class="panel-heading"><div><h2>总线观察窗</h2><p class="hint" id="scope-description">差分电压 → 收发器 RX → 控制器采样</p></div><div class="transport"><button id="restart" aria-label="回到第一位">↶</button><button id="previous" aria-label="上一位">‹</button><button id="play" class="primary">▶ 播放</button><button id="next" aria-label="下一位">›</button><select id="speed" aria-label="演示速度"><option value="700">慢速</option><option value="240" selected>中速</option><option value="60">快速</option></select></div></div>
+<div class="metrics"><div><span>实际位速率</span><strong id="metric-rate"></strong></div><div><span>一个位持续</span><strong id="metric-bit"></strong></div><div><span id="sample-caption">采样点</span><strong id="metric-sample"></strong></div><div><span>当前帧长度</span><strong id="metric-length"></strong></div></div>
+<div class="frame-title"><span>帧结构 <small>点击字段定位</small></span><span id="frame-meta"></span></div><div id="frame-map" class="frame-map"></div>
+<div class="wave-legend" id="wave-legend"></div><div class="wave-wrap"><svg id="wave" role="img" aria-label="当前帧的电压波形与采样点"></svg></div>
+<div class="scrub"><span id="bit-position"></span><input id="cursor" type="range" min="0" value="0" aria-label="选择线上位"><span id="current-time"></span></div>
+<div id="bit-strip" class="bit-strip" aria-label="当前窗口的逐位数据"></div>
+<div id="selected-bit" class="selected-bit" aria-live="polite"></div>
+<div class="timing-heading"><h3 id="zoom-title">把当前这一位放大</h3><span id="zoom-caption"></span></div><svg id="bit-zoom" role="img" aria-label="一个位内的时间刻度与采样位置"></svg>
+<p class="model-note" id="model-note"></p>
+</section>
+<section class="panel" id="arbitration-panel" hidden><div class="panel-heading"><h2>逐位仲裁</h2><span class="badge">显性 0 覆盖隐性 1</span></div><div id="arbitration"></div></section>
+<div class="bottom-grid"><section class="panel result-panel"><div class="panel-heading"><h2>接收结果</h2><span id="result-badge" class="badge"></span></div><div id="result" aria-live="polite"></div></section><section class="panel log-panel"><div class="panel-heading"><h2>事件记录</h2><span class="badge">仿真事件 · 非实测</span></div><ol id="log"></ol></section></div>
+</section></div>
+<footer>支持：经典 CAN 11 位数据帧 / UART 8N1、8E1、8O1。教学模型不连接硬件；不模拟模拟电路、完整 CAN 错误状态机、自动重发、CAN FD 或 CAN XL。</footer>
+</main>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>

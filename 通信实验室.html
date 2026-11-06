@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通信实验室 · CAN / UART</title>
+<style>:root{color-scheme:light;--bg:#f2f5f4;--ink:#182e2b;--muted:#61716f;--line:#dce5e1;--green:#087c69;--mint:#e5f4ed;--orange:#b66b1c;--blue:#3171b4;--red:#b63e47;--violet:#8063b1}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.6}button,input,textarea,select{font:inherit}button{cursor:pointer;transition:background .15s,transform .15s;border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 12px;color:var(--ink)}button:hover{background:#eaf3ef}button:active{transform:translateY(1px)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #83bcb0;outline-offset:3px}button:disabled{cursor:default;opacity:.45}input,textarea,select{width:100%;min-width:0;border:1px solid #d1ddd7;border-radius:6px;padding:8px 9px;color:var(--ink);background:#fff}input:disabled{background:#f1f4f2;color:#87928e}textarea{resize:vertical;font-family:Consolas,monospace;letter-spacing:1px}label{display:block;font-size:12px;font-weight:600;margin-bottom:12px}label input,label textarea,label select{display:block;margin-top:5px;font-size:14px;font-weight:400}h1,h2,h3,p{margin:0}h1{font-size:30px;font-weight:650;letter-spacing:-1px;margin:4px 0}h2{font-size:15px;font-weight:650}h3{font-size:13px;font-weight:600}.topbar{height:76px;padding:0 36px;border-bottom:1px solid var(--line);background:#fff;display:flex;align-items:center;gap:22px}.brand{display:flex;gap:11px;align-items:center;margin-right:auto}.brand-mark{background:var(--ink);color:#b6f2d4;width:36px;height:36px;border-radius:10px;text-align:center;font:32px/33px monospace}.brand strong{display:block;font-size:16px}.brand small{display:block;font-size:9px;letter-spacing:2px;color:var(--muted)}.offline{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}.offline i{width:6px;height:6px;border-radius:50%;background:var(--green)}.subtle{font-size:12px}main{max-width:1580px;margin:auto;padding:30px 36px}.intro{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:25px}.intro p{color:var(--muted);font-size:13px}.eyebrow{font-size:11px;color:var(--green);letter-spacing:1px}.protocol-tabs{display:flex;gap:4px;background:#e6ece8;padding:5px;border-radius:9px}.protocol-tabs button{border:0;background:transparent;min-width:90px;letter-spacing:1px;font-weight:600}.protocol-tabs button.active{background:#fff;box-shadow:0 2px 5px #203c2910}.workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:22px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:21px;min-width:0}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}.badge{font-size:10px;letter-spacing:.3px;color:var(--muted);background:#f0f4f1;border-radius:4px;padding:3px 6px}.settings{padding:20px}.settings .panel-heading{gap:5px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hint{font-size:11px;color:var(--muted);line-height:1.7}.settings> .hint{margin-top:-4px;margin-bottom:15px}.section-title{border-top:1px solid var(--line);padding-top:16px;margin:17px 0 12px;font-size:12px;font-weight:600}.section-title span{font-size:10px;color:var(--muted);display:block;font-weight:400}.calculate{align-self:center;font-size:11px;margin-top:7px;padding:9px 4px}details{margin-bottom:12px}summary{cursor:pointer;font-size:11px;color:var(--muted);margin-bottom:10px}.formula{border-radius:7px;padding:10px 12px;background:var(--mint);font-size:12px;line-height:1.8;color:#245d50}.primary{background:var(--green);color:#fff;border-color:var(--green)}.primary:hover{background:#086652}.full{width:100%;margin-top:14px}.config-hint{margin:8px 0 0!important;text-align:center}.experiment{display:flex;flex-direction:column;gap:18px;min-width:0}.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.pipeline button{text-align:left;position:relative;padding:10px 8px;background:#f7f9f7;border:1px solid transparent;min-width:0}.pipeline button.active{background:var(--mint);border-color:#add5c4}.pipeline button small{display:block;font-size:10px;color:var(--muted)}.pipeline button b{font-weight:500;font-size:12px}.pipeline button .step-number{display:block;color:var(--green);font:11px Consolas,monospace;margin-bottom:6px}.stage-detail{font-size:12px;color:#4a615a;margin-top:15px;min-height:40px}.transport{display:flex;gap:5px;align-items:center}.transport button{padding:5px 10px}.transport select{width:67px;padding:5px;font-size:11px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);padding:0 0 20px;gap:15px}.metrics span{display:block;font-size:11px;color:var(--muted)}.metrics strong{display:block;font-size:20px;font-weight:550;letter-spacing:-.6px;font-variant-numeric:tabular-nums}.frame-title{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:11px;margin-bottom:8px}.frame-title small{color:var(--muted);margin-left:6px}#frame-meta{color:var(--muted)}.frame-map{display:flex;gap:3px;min-height:32px;overflow-x:auto}.frame-map button{padding:6px 5px;font:10px Consolas,"Microsoft YaHei",monospace;white-space:nowrap;border:0;border-radius:4px;background:#f0f4f1;min-width:34px}.frame-map button.active{background:#ccebdc;color:#15533e}.frame-map button[data-field="DATA"]{background:#e0ecf6}.frame-map button[data-field="CRC"]{background:#efe9f5}.frame-map button[data-field="ACK"]{background:#fff0d9}.wave-legend{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0 3px;font-size:10px;color:var(--muted)}.wave-legend span{display:flex;align-items:center;gap:5px}.wave-legend i{width:16px;height:3px;display:inline-block}.wave-wrap{width:100%;overflow:hidden}#wave{display:block;width:100%;height:220px}.scrub{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}.scrub input{padding:0;accent-color:var(--green);flex:1}.scrub span{white-space:nowrap}.bit-strip{display:flex;gap:3px;margin-top:12px}.bit-strip button{flex:1;min-width:0;padding:4px 0;border-radius:4px;background:#f5f7f5;font:12px Consolas,monospace}.bit-strip button.stuffed{border-color:#d8b779;color:#9a6c25}.bit-strip button.selected{background:var(--ink);color:#fff;border-color:var(--ink)}.selected-bit{margin-top:10px;padding:10px 12px;border-radius:5px;background:#f4f7f5;font-size:12px;min-height:40px}.timing-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px}.timing-heading span{font-size:11px;color:var(--muted)}#bit-zoom{width:100%;height:104px;display:block}.model-note{font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding-top:9px;line-height:1.7}.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.result-title{font-weight:600;font-size:17px;margin-bottom:8px}.result-detail{font-size:12px;color:var(--muted)}.rx-bytes{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}.rx-bytes span{font:15px Consolas,monospace;padding:5px 9px;background:var(--mint);border-radius:4px}.decode{margin-top:9px;font-size:11px;color:var(--muted)}#log{margin:0;padding:0;list-style:none;max-height:225px;overflow:auto;counter-reset:events}#log li{position:relative;padding:0 0 11px 26px;color:#4e625b;font-size:11px;counter-increment:events}#log li:before{content:counter(events,decimal-leading-zero);position:absolute;left:0;top:1px;font:10px Consolas,monospace;color:#85968d}.bad{color:var(--red)!important}.good{color:var(--green)!important}#validation{padding:9px;background:#fff0ef;color:var(--red);font-size:12px;border-radius:5px;margin-top:10px}footer{font-size:11px;color:var(--muted);padding:24px 0 5px;text-align:center}.arb-grid{display:grid;gap:5px;overflow:auto}.arb-row{display:flex;align-items:center;gap:5px;min-width:480px;font:12px Consolas,monospace}.arb-row b{width:90px;flex-shrink:0;font-size:11px;font-weight:400}.arb-cell{flex:1;text-align:center;padding:5px;background:#f0f4f1;border-radius:3px}.arb-cell.loss{background:#fde6dc;color:#a34219}.arb-cell.inactive{opacity:.4}.arb-caption{font-size:12px;margin-top:14px;color:var(--muted)}[hidden]{display:none!important}@media(min-width:1500px){.workspace{grid-template-columns:330px minmax(0,1fr)}}@media(max-width:1100px){main{padding:24px 20px}.workspace{grid-template-columns:275px minmax(0,1fr);gap:14px}.panel{padding:16px}.metrics strong{font-size:16px}.pipeline{gap:4px}.pipeline button{padding:8px 5px}.pipeline button b{font-size:11px}.bottom-grid{grid-template-columns:1fr}.topbar{padding:0 20px}.transport{flex-wrap:wrap}}@media(max-width:780px){main{padding:18px 12px}.topbar{height:65px;padding:0 15px;gap:10px}.offline{display:none}.intro{align-items:flex-start}.intro h1{font-size:25px}.intro p{font-size:12px}.protocol-tabs button{min-width:60px;padding:6px}.workspace{grid-template-columns:1fr}.settings .two{grid-template-columns:1fr 1fr}.panel{padding:16px}.metrics{gap:10px}.pipeline button small{font-size:9px}.frame-map{flex-wrap:wrap}h1{font-size:24px}}@media(max-width:430px){.intro{flex-direction:column;gap:12px}.metrics{grid-template-columns:1fr 1fr}.pipeline{grid-template-columns:repeat(3,1fr)}.scrub{gap:6px}.timing-heading{align-items:flex-start;flex-direction:column;gap:3px}.wave-legend{gap:8px}.bit-strip{gap:2px}.bit-strip button{font-size:10px}.topbar .subtle{font-size:11px}.panel-heading{gap:8px}.transport{gap:4px}.stage-detail{min-height:60px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>通信实验室</strong><small>PROTOCOL LAB / 01</small></div></div><span class="offline"><i></i> 本地离线 · 教学仿真</span><button id="export" class="subtle">导出本次实验</button></header>
+<main>
+<section class="intro"><div><span class="eyebrow">从一个字节，到总线上的每一位</span><h1>让通信过程看得见。</h1><p>自己发一帧，沿着电信号追踪数据，观察它如何被接收。</p></div><div class="protocol-tabs" role="group" aria-label="实验协议"><button id="tab-can" class="active" aria-pressed="true">CAN</button><button id="tab-uart" aria-pressed="false">UART</button></div></section>
+<div class="workspace">
+<aside class="panel settings">
+<div class="panel-heading"><h2>实验配置</h2><span id="format-label" class="badge">经典 CAN · 标准帧</span></div>
+<label>快速实验<select id="preset"><option value="normal">01 / 正常收发</option><option value="stuff">02 / 连续 0 与位填充</option><option value="noack">03 / 没有接收节点</option><option value="filter">04 / ACK 成功，但过滤掉</option><option value="flip">05 / 数据位受干扰</option><option value="delay">06 / 信号晚于采样点</option><option value="arbitration">07 / 两个节点同时发送</option></select></label>
+<div id="can-fields">
+<div class="two"><label>发送 ID（十六进制）<input id="can-id" value="200" spellcheck="false" maxlength="5"></label><label>竞争节点 ID（十六进制）<input id="other-id" value="300" spellcheck="false" maxlength="5" disabled></label></div>
+</div>
+<label>数据（十六进制字节）<textarea id="payload" rows="2" spellcheck="false">DC 05</textarea></label>
+<p class="hint" id="payload-hint">0–8 字节；DC 05 按小端无符号数解释为 1500。</p>
+<div id="can-timing">
+<div class="section-title">位时序 <span>更改参数，观察时间关系</span></div>
+<div class="two"><label>CAN 时钟 / MHz<input id="clock" type="number" min="1" max="1000" step="1" value="160"></label><label>目标位速率<select id="target"><option value="1000000">1 Mbit/s</option><option value="500000" selected>500 kbit/s</option><option value="250000">250 kbit/s</option><option value="125000">125 kbit/s</option></select></label></div>
+<div class="two"><label>目标采样点 / %<input id="sample-target" type="number" min="50" max="95" step="0.1" value="80"></label><button id="calculate" class="calculate">计算一组参数 ↗</button></div>
+<details><summary>手动设置分频与时间段</summary><div class="three"><label>实际分频<input id="brp" type="number" min="1" max="1024" value="16"></label><label>TSEG1 / TQ<input id="seg1" type="number" min="1" max="256" value="15"></label><label>TSEG2 / TQ<input id="seg2" type="number" min="1" max="128" value="4"></label></div><p class="hint">同步段固定为 1 TQ。这些是实际数量，不是寄存器编码；具体芯片支持范围可能不同。</p></details>
+<div class="formula" id="timing-formula"></div>
+<div class="section-title">接收条件</div>
+<label>接收节点<select id="receiver"><option value="normal">正常接收（参与 ACK）</option><option value="listen">只听模式（不发送 ACK）</option><option value="missing">无接收节点</option></select></label>
+<div class="two"><label>过滤 ID（十六进制）<input id="filter-id" placeholder="空白 = 接收全部" spellcheck="false"></label><label>相对边沿迟到 / ns<input id="delay" type="number" min="0" max="10000" step="50" value="200"></label></div>
+<label>故障注入<select id="fault"><option value="none">无故障</option><option value="bitflip">翻转一个线上数据位</option></select></label>
+</div>
+<div id="uart-fields" hidden><div class="two"><label>发送波特率<input id="baud" type="number" min="300" max="10000000" value="115200"></label><label>接收波特率<input id="rx-baud" type="number" min="300" max="10000000" value="115200"></label></div><label>帧格式<select id="parity"><option value="none">8N1 · 无校验</option><option value="even">8E1 · 偶校验</option><option value="odd">8O1 · 奇校验</option></select></label><p class="hint">UART 每字节独立起始同步，数据低位先发。显示 3.3 V 逻辑电平示意，不是 RS-232 电压。</p></div>
+<div id="validation" role="alert" hidden></div>
+<button id="build" class="primary full">生成实验 →</button><p class="hint config-hint" id="dirty">配置已应用。点击播放或选择任意一位。</p>
+</aside>
+<section class="experiment">
+<section class="panel pipeline-panel"><div class="panel-heading"><h2>完整数据流程</h2><span class="badge">点击步骤查看说明</span></div><div class="pipeline" id="pipeline"></div><div id="stage-detail" class="stage-detail" aria-live="polite"></div></section>
+<section class="panel scope-panel">
+<div class="panel-heading"><div><h2>总线观察窗</h2><p class="hint" id="scope-description">差分电压 → 收发器 RX → 控制器采样</p></div><div class="transport"><button id="restart" aria-label="回到第一位">↶</button><button id="previous" aria-label="上一位">‹</button><button id="play" class="primary">▶ 播放</button><button id="next" aria-label="下一位">›</button><select id="speed" aria-label="演示速度"><option value="700">慢速</option><option value="240" selected>中速</option><option value="60">快速</option></select></div></div>
+<div class="metrics"><div><span>实际位速率</span><strong id="metric-rate"></strong></div><div><span>一个位持续</span><strong id="metric-bit"></strong></div><div><span id="sample-caption">采样点</span><strong id="metric-sample"></strong></div><div><span>当前帧长度</span><strong id="metric-length"></strong></div></div>
+<div class="frame-title"><span>帧结构 <small>点击字段定位</small></span><span id="frame-meta"></span></div><div id="frame-map" class="frame-map"></div>
+<div class="wave-legend" id="wave-legend"></div><div class="wave-wrap"><svg id="wave" role="img" aria-label="当前帧的电压波形与采样点"></svg></div>
+<div class="scrub"><span id="bit-position"></span><input id="cursor" type="range" min="0" value="0" aria-label="选择线上位"><span id="current-time"></span></div>
+<div id="bit-strip" class="bit-strip" aria-label="当前窗口的逐位数据"></div>
+<div id="selected-bit" class="selected-bit" aria-live="polite"></div>
+<div class="timing-heading"><h3 id="zoom-title">把当前这一位放大</h3><span id="zoom-caption"></span></div><svg id="bit-zoom" role="img" aria-label="一个位内的时间刻度与采样位置"></svg>
+<p class="model-note" id="model-note"></p>
+</section>
+<section class="panel" id="arbitration-panel" hidden><div class="panel-heading"><h2>逐位仲裁</h2><span class="badge">显性 0 覆盖隐性 1</span></div><div id="arbitration"></div></section>
+<div class="bottom-grid"><section class="panel result-panel"><div class="panel-heading"><h2>接收结果</h2><span id="result-badge" class="badge"></span></div><div id="result" aria-live="polite"></div></section><section class="panel log-panel"><div class="panel-heading"><h2>事件记录</h2><span class="badge">仿真事件 · 非实测</span></div><ol id="log"></ol></section></div>
+</section></div>
+<footer>支持：经典 CAN 11 位数据帧 / UART 8N1、8E1、8O1。教学模型不连接硬件；不模拟模拟电路、完整 CAN 错误状态机、自动重发、CAN FD 或 CAN XL。</footer>
+</main>
+<script>(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.ProtocolLab = api;
+})(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
+
+  function integer(value, min, max, label) {
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < min || n > max) throw new Error(`${label}必须是 ${min}～${max} 的整数。`);
+    return n;
+  }
+  function positive(value, label) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) throw new Error(`${label}必须是大于 0 的有限数。`);
+    return n;
+  }
+  function parseData(input, maxBytes = 8) {
+    let bytes;
+    if (Array.isArray(input) || ArrayBuffer.isView(input)) bytes = Array.from(input);
+    else {
+      const text = String(input == null ? '' : input).trim();
+      if (!text) bytes = [];
+      else {
+        let tokens = text.split(/[\s,:_-]+/).filter(Boolean);
+        if (tokens.length === 1 && !/^0x/i.test(tokens[0]) && tokens[0].length > 2 && tokens[0].length % 2 === 0) tokens = tokens[0].match(/.{2}/g);
+        if (tokens.some(t => !/^(?:0x)?[\da-f]{1,2}$/i.test(t))) throw new Error('数据请输入十六进制字节，例如 DC 05 00 FF。');
+        bytes = tokens.map(t => parseInt(t.replace(/^0x/i, ''), 16));
+      }
+    }
+    if (bytes.length > maxBytes) throw new Error(`数据最多 ${maxBytes} 字节。`);
+    return bytes.map(n => integer(n, 0, 255, '数据字节'));
+  }
+  function canId(value) {
+    if (typeof value === 'string') {
+      if (!/^(?:0x)?[\da-f]{1,3}$/i.test(value.trim())) throw new Error('CAN ID 请输入 000～7FF 的十六进制数。');
+      value = parseInt(value.replace(/^0x/i, ''), 16);
+    }
+    return integer(value, 0, 0x7ff, '标准 CAN ID');
+  }
+  function timing(config = {}) {
+    const clockMHz = positive(config.clockMHz == null ? 160 : config.clockMHz, 'CAN 时钟 MHz');
+    if (clockMHz > 1000) throw new Error('本实验 CAN 时钟范围为大于 0 且不超过 1000 MHz。');
+    const brp = integer(config.brp == null ? 16 : config.brp, 1, 1024, '实际分频系数');
+    const tseg1 = integer(config.tseg1 == null ? 15 : config.tseg1, 1, 256, 'TSEG1');
+    const tseg2 = integer(config.tseg2 == null ? 4 : config.tseg2, 1, 128, 'TSEG2');
+    const totalTq = 1 + tseg1 + tseg2;
+    const tqNs = 1000 * brp / clockMHz;
+    const bitNs = totalTq * tqNs;
+    return { clockMHz, brp, tseg1, tseg2, totalTq, tqNs, bitNs, bitUs: bitNs / 1000,
+      bitrate: 1e9 / bitNs, samplePercent: (1 + tseg1) / totalTq * 100, sampleNs: (1 + tseg1) * tqNs };
+  }
+  function suggestTiming(clockMHz, bitrate, samplePercent = 80) {
+    const hz = positive(clockMHz, 'CAN 时钟 MHz') * 1e6;
+    bitrate = positive(bitrate, '目标位速率');
+    samplePercent = positive(samplePercent, '目标采样点');
+    if (samplePercent >= 100 || clockMHz > 1000) throw new Error('采样点应小于 100%，时钟不超过 1000 MHz。');
+    let best = null;
+    for (let totalTq = 3; totalTq <= 385; totalTq++) {
+      const idealBrp = hz / bitrate / totalTq;
+      for (const brp of new Set([Math.floor(idealBrp), Math.ceil(idealBrp)])) {
+      if (brp < 1 || brp > 1024) continue;
+      const tseg1 = Math.max(1, Math.min(256, totalTq - 2, Math.round(totalTq * samplePercent / 100) - 1));
+      const tseg2 = totalTq - 1 - tseg1;
+      if (tseg2 < 1 || tseg2 > 128) continue;
+      const t = timing({ clockMHz, brp, tseg1, tseg2 });
+      const errorPercent = (t.bitrate / bitrate - 1) * 100;
+      const score = Math.abs(errorPercent) * 1e6 + Math.abs(t.samplePercent - samplePercent) * 100 + Math.abs(totalTq - 20) * 0.001;
+      if (!best || score < best.score) best = { ...t, targetBitrate: bitrate, targetSamplePercent: samplePercent, errorPercent, score };
+      }
+    }
+    if (!best) throw new Error('在本实验的分频与 TQ 范围内无法找到配置。');
+    delete best.score;
+    return best;
+  }
+  function binary(value, width) {
+    return Array.from({ length: width }, (_, i) => (value >>> (width - i - 1)) & 1);
+  }
+  function bitsNumber(bits) { return bits.reduce((n, b) => (n << 1) | (typeof b === 'number' ? b : b.value), 0); }
+  function crc15(values) {
+    let crc = 0;
+    for (const v of values) {
+      const feedback = ((crc >>> 14) & 1) ^ (typeof v === 'number' ? v : v.value);
+      crc = (crc << 1) & 0x7fff;
+      if (feedback) crc ^= 0x4599;
+    }
+    return crc;
+  }
+  function fieldSegments(bits) {
+    const result = [];
+    for (let i = 0; i < bits.length; i++) {
+      const b = bits[i];
+      const last = result[result.length - 1];
+      if (last && last.name === b.field && last.byteIndex === b.byteIndex) { last.end++; last.length++; }
+      else result.push({ name: b.field, start: i, end: i + 1, length: 1, byteIndex: b.byteIndex });
+    }
+    return result;
+  }
+  function stuffBits(raw) {
+    const bits = [];
+    let last = -1, run = 0;
+    raw.forEach((b, rawIndex) => {
+      bits.push({ ...b, rawIndex, stuffed: false, index: bits.length });
+      run = b.value === last ? run + 1 : 1;
+      last = b.value;
+      if (run === 5) {
+        last = 1 - last;
+        bits.push({ value: last, field: b.field, rawIndex: null, stuffed: true, index: bits.length });
+        run = 1;
+      }
+    });
+    return bits;
+  }
+  function decodeCan(bits) {
+    const raw = [];
+    let cursor = 0, last = -1, run = 0, target = 34, dlc = 0;
+    function fail(code, detail) { return { ok: false, code, detail, raw, cursor, data: [], crc: null }; }
+    while (raw.length < target) {
+      if (cursor >= bits.length) return fail('format', '报文提前结束。');
+      const value = bits[cursor++].value;
+      raw.push(value);
+      run = value === last ? run + 1 : 1;
+      last = value;
+      if (raw.length === 19) {
+        dlc = bitsNumber(raw.slice(15, 19));
+        if (dlc > 8) return fail('format', '本实验只支持 DLC 0～8。');
+        target = 19 + dlc * 8 + 15;
+      }
+      if (run === 5) {
+        if (cursor >= bits.length || bits[cursor].value === last) return fail('stuff', `线上第 ${cursor + 1} 位违反位填充规则。`);
+        last = bits[cursor++].value;
+        run = 1;
+      }
+    }
+    if (raw[0] !== 0 || raw[12] !== 0 || raw[13] !== 0 || raw[14] !== 0) return fail('format', '起始位或标准数据帧格式不正确。');
+    const receivedCrc = bitsNumber(raw.slice(-15));
+    const calculatedCrc = crc15(raw.slice(0, -15));
+    const data = Array.from({ length: dlc }, (_, i) => bitsNumber(raw.slice(19 + i * 8, 27 + i * 8)));
+    const formatOffsets = [0, 2, 3, 4, 5, 6, 7, 8, 9];
+    if (formatOffsets.some(i => !bits[cursor + i] || bits[cursor + i].value !== 1)) return { ...fail('format', 'CRC 分隔符、ACK 分隔符或 EOF 的格式错误。'), crc: receivedCrc, calculatedCrc };
+    if (receivedCrc !== calculatedCrc) return { ...fail('crc', '接收端重新计算的 CRC 与帧内 CRC 不一致，丢弃这帧。'), crc: receivedCrc, calculatedCrc };
+    return { ok: true, code: 'valid', detail: '位填充、帧格式和 CRC 检查通过。', raw, cursor, id: bitsNumber(raw.slice(1, 12)), data, crc: receivedCrc, calculatedCrc };
+  }
+  function buildCan(config = {}) {
+    const id = canId(config.id == null ? 0x200 : config.id);
+    const data = parseData(config.data == null ? [0xdc, 0x05] : config.data);
+    const t = timing(config);
+    const receiver = config.receiver || 'normal';
+    if (!['normal', 'listen', 'missing'].includes(receiver)) throw new Error('接收节点模式无效。');
+    const fault = config.fault || 'none';
+    if (!['none', 'bitflip'].includes(fault)) throw new Error('故障类型无效。');
+    const filterId = config.filterId == null || config.filterId === '' ? null : canId(config.filterId);
+    const delayNs = Number(config.delayNs || 0);
+    if (!Number.isFinite(delayNs) || delayNs < 0 || delayNs > 1e8) throw new Error('边沿迟到时间应为 0～100000000 ns。');
+    const raw = [];
+    function add(field, values) { for (const value of values) raw.push({ value, field }); }
+    add('SOF', [0]); add('ID', binary(id, 11)); add('RTR', [0]); add('IDE', [0]); add('r0', [0]);
+    add('DLC', binary(data.length, 4));
+    data.forEach(byte => add('DATA', binary(byte, 8)));
+    const crc = crc15(raw);
+    add('CRC', binary(crc, 15));
+    const bits = stuffBits(raw);
+    const stuffCount = bits.filter(b => b.stuffed).length;
+    function tail(field, values) { values.forEach(value => bits.push({ value, field, rawIndex: null, stuffed: false, index: bits.length })); }
+    tail('CRC delimiter', [1]); tail('ACK', [1]); tail('ACK delimiter', [1]); tail('EOF', Array(7).fill(1)); tail('IFS', Array(3).fill(1));
+    const intendedBits = bits.map(b => ({ ...b }));
+    let faultIndex = null;
+    if (fault === 'bitflip') {
+      faultIndex = bits.findIndex(b => b.field === (data.length ? 'DATA' : 'CRC') && !b.stuffed);
+      bits[faultIndex].value ^= 1;
+      bits[faultIndex].fault = true;
+    }
+    const decoded = decodeCan(bits);
+    const timingOk = delayNs < t.sampleNs;
+    const valid = decoded.ok && timingOk;
+    const ack = receiver === 'normal' && valid;
+    const ackIndex = bits.findIndex(b => b.field === 'ACK');
+    bits[ackIndex].value = ack ? 0 : 1;
+    intendedBits[ackIndex].value = receiver === 'normal' ? 0 : 1;
+    const filterAccepted = filterId == null || decoded.id === filterId;
+    const delivered = receiver !== 'missing' && valid && filterAccepted;
+    let outcome;
+    if (receiver === 'missing') outcome = { ok: false, code: 'noack', title: 'ACK 错误：没有接收节点', detail: 'ACK 槽保持隐性 1，发送端未得到确认；自动重发取决于控制器配置。' };
+    else if (!timingOk) outcome = { ok: false, code: 'timing', title: '采样时序不足（简化模型）', detail: '相对本地位边界的边沿迟到/稳定时间已到达采样点，本实验判为不可可靠读取。它不是电缆单程延迟的直接判据。' };
+    else if (!decoded.ok) outcome = { ok: false, code: decoded.code, title: decoded.code === 'crc' ? '接收 CRC 校验失败' : decoded.code === 'stuff' ? '接收位填充检查失败' : '接收帧格式检查失败', detail: decoded.detail };
+    else if (receiver === 'listen') outcome = { ok: false, code: 'noack', title: '监听端可解码，发送端未获 ACK', detail: filterAccepted ? '监听端已正确解码，但监听模式不驱动 ACK；发送端认为本次发送失败。' : '监听端校验通过但被过滤，且监听模式不驱动 ACK；发送端认为本次发送失败。' };
+    else if (!filterAccepted) outcome = { ok: true, code: 'filtered', title: '总线发送成功，应用未收到', detail: '正常节点对有效帧发送 ACK；验收过滤器只决定是否交给应用，不决定是否 ACK。' };
+    else outcome = { ok: true, code: 'success', title: '发送成功，接收应用获得数据', detail: '接收端去填充并通过 CRC、格式检查，驱动 ACK，过滤通过后将数据交给应用。' };
+    const logs = [
+      `应用提交标准帧 ID 0x${id.toString(16).toUpperCase().padStart(3, '0')}，${data.length} 字节。`,
+      `控制器按 SOF、ID、控制字段、数据构造帧，CRC-15 为 0x${crc.toString(16).toUpperCase().padStart(4, '0')}。`,
+      `SOF 至 CRC 序列之间插入 ${stuffCount} 个填充位；线上共 ${bits.length - 3} 位，随后有 3 位 IFS。`,
+      `收发器用差分状态表示位：显性 0 约 2 V 差分；隐性 1 约 0 V 差分。`,
+      `每位 ${t.bitUs.toFixed(3)} μs，本地位起点后 ${(t.sampleNs / 1000).toFixed(3)} μs 采样（${t.samplePercent.toFixed(2)}%）。`
+    ];
+    if (faultIndex != null) logs.push(`接收端误读实验：把线上第 ${faultIndex + 1} 位翻转，保留后续帧用于检查。`);
+    logs.push(receiver === 'missing' ? '没有接收节点参与。' : timingOk ? decoded.detail : '边沿迟到超过简化时序预算。');
+    logs.push(ack ? '正常接收节点把 ACK 槽驱动为显性 0。' : 'ACK 槽保持隐性 1，发送端未获得确认。');
+    logs.push(outcome.detail);
+    return { protocol: 'CAN', id, data, bits, intendedBits, fields: fieldSegments(bits), timing: t, crc,
+      crcReceived: decoded.crc, crcCalculated: decoded.calculatedCrc, stuffCount, faultIndex, ack, ackIndex,
+      filterAccepted, receiver, delayNs, outcome, rxData: delivered ? decoded.data : [], rxBits: decoded.raw,
+      samples: bits.map((b, i) => ({ index: i, timeUs: (i * t.bitNs + t.sampleNs) / 1000, expected: intendedBits[i].value, actual: b.value, field: b.field, ok: timingOk && b.value === intendedBits[i].value })),
+      frameBitCount: bits.length - 3, durationUs: bits.length * t.bitUs, logs,
+      limits: [
+        '经典 CAN、11 位标准数据帧、0～8 字节；不包含 CAN FD/XL 或远程帧。',
+        '电压为高速 CAN 典型示意值；没有模拟模拟电路、反射、噪声及收发器电气门限。',
+        '边沿迟到指相对接收端本地位边界的稳定时间；固定传播延迟可由 SOF 同步吸收，真实仲裁还需往返传播预算。',
+        '位翻转用于接收解码实验；真实节点可能通过位监测更早中止。波形保留名义帧尾，不模拟错误标志、自动重发、错误计数和 Bus Off。',
+        '未实现完整振荡器漂移、重同步、SJW 和多节点传播；时序参数范围为实验范围，不代表某款芯片。'
+      ] };
+  }
+  function arbitrate(idA, idB) {
+    idA = canId(idA); idB = canId(idB);
+    const a = binary(idA, 11), b = binary(idB, 11), steps = [];
+    let activeA = true, activeB = true, lossIndex = null, winner = 'tie', loser = null;
+    for (let i = 0; i < 11; i++) {
+      const txA = activeA ? a[i] : 1, txB = activeB ? b[i] : 1;
+      const bus = txA & txB;
+      let lost = null;
+      if (activeA && txA === 1 && bus === 0) { activeA = false; lost = 'A'; winner = 'B'; loser = 'A'; lossIndex = i; }
+      if (activeB && txB === 1 && bus === 0) { activeB = false; lost = 'B'; winner = 'A'; loser = 'B'; lossIndex = i; }
+      steps.push({ index: i, a: a[i], b: b[i], txA, txB, bus, activeA, activeB, lost });
+    }
+    return { idA, idB, winner, loser, lossIndex, steps, detail: winner === 'tie' ? 'ID 相同，ID 字段未决出胜负；相同标准数据帧仲裁字段可以同时通过，数据不同可能导致位错误。' : `${winner} 获胜；${loser} 在 ID 的第 ${lossIndex + 1} 位发 1 却读到 0，退出仲裁并转为接收。此表仅展示 ID 位，省略共同填充位。` };
+  }
+  function buildUart(config = {}) {
+    const data = parseData(config.data == null ? [0x55, 0xa5] : config.data, 32);
+    if (!data.length) throw new Error('UART 实验至少输入一个数据字节。');
+    const baud = positive(config.baud == null ? 115200 : config.baud, '发送波特率');
+    const receiverBaud = positive(config.receiverBaud == null ? baud : config.receiverBaud, '接收波特率');
+    if (baud > 1e8 || receiverBaud > 1e8) throw new Error('UART 波特率应不超过 100000000。');
+    const parity = config.parity || 'none';
+    if (!['none', 'even', 'odd'].includes(parity)) throw new Error('请选择无校验、偶校验或奇校验。');
+    const delayNs = Number(config.delayNs || 0);
+    if (!Number.isFinite(delayNs) || delayNs < 0) throw new Error('传播延迟应为非负有限数。');
+    const bits = [], frames = [];
+    const bitUs = 1e6 / baud, rxBitUs = 1e6 / receiverBaud, delayUs = delayNs / 1000;
+    data.forEach((byte, byteIndex) => {
+      const start = bits.length;
+      function push(value, field) { bits.push({ value, field, byteIndex, stuffed: false, rawIndex: bits.length, index: bits.length }); }
+      push(0, 'START');
+      const values = Array.from({ length: 8 }, (_, i) => (byte >>> i) & 1);
+      values.forEach(v => push(v, 'DATA'));
+      if (parity !== 'none') push((values.reduce((a, b) => a + b, 0) % 2) ^ (parity === 'odd' ? 1 : 0), 'PARITY');
+      push(1, 'STOP');
+      frames.push({ byteIndex, byte, start, end: bits.length, startUs: start * bitUs + delayUs });
+    });
+    const samples = [], rxData = [];
+    let observedMismatch = false, framingError = false, parityError = false, sampleOutside = false;
+    function lineAt(timeUs) {
+      const i = Math.floor((timeUs - delayUs) / bitUs + 1e-10);
+      return i >= 0 && i < bits.length ? bits[i].value : 1;
+    }
+    for (const frame of frames) {
+      const values = [];
+      for (let j = 0; j < frame.end - frame.start; j++) {
+        const timeUs = frame.startUs + (j + 0.5) * rxBitUs;
+        const bit = bits[frame.start + j], actual = lineAt(timeUs);
+        const inWindow = timeUs >= frame.startUs + j * bitUs && timeUs < frame.startUs + (j + 1) * bitUs;
+        samples.push({ index: frame.start + j, timeUs, expected: bit.value, actual, field: bit.field, byteIndex: frame.byteIndex, ok: actual === bit.value, inWindow });
+        values.push(actual);
+        if (!inWindow) sampleOutside = true;
+        if (actual !== bit.value) observedMismatch = true;
+      }
+      const received = values.slice(1, 9).reduce((n, v, i) => n | (v << i), 0);
+      const frameOk = values[0] === 0 && values[values.length - 1] === 1;
+      const parityOk = parity === 'none' || ((values.slice(1, 10).reduce((a, b) => a + b, 0) % 2) === (parity === 'odd' ? 1 : 0));
+      framingError = framingError || !frameOk;
+      parityError = parityError || !parityOk;
+      Object.assign(frame, { received, framingOk: frameOk, parityOk, samples: samples.slice(-values.length) });
+      if (frameOk && parityOk) rxData.push(received);
+    }
+    let outcome;
+    if (framingError) outcome = { ok: false, code: 'framing', title: 'UART 帧错误', detail: '接收时钟偏差使起始位或停止位采样不符合格式，部分字节无法正确接收。' };
+    else if (parityError) outcome = { ok: false, code: 'parity', title: 'UART 奇偶校验失败', detail: '采样后的数据和校验位不满足所选奇偶规则。' };
+    else if (observedMismatch) outcome = { ok: false, code: 'corrupted', title: '数据被误读，UART 未必能察觉', detail: '采样值与发送值不同，但起始/停止位与所选校验仍通过；UART 没有 CAN 的 CRC 和 ACK。' };
+    else if (sampleOutside) outcome = { ok: true, code: 'margin', title: '此数据碰巧读对，时序裕量不足', detail: '至少一个采样点已偏出对应位区间；相邻位电平相同使本次读值仍一致，不能保证其他数据可靠。' };
+    else outcome = { ok: true, code: 'success', title: 'UART 接收完成', detail: '每个字节由起始位重新建立采样时序；按最低有效位优先还原字节，停止位及所选校验通过。' };
+    const logs = [
+      `应用提交 ${data.length} 字节，格式为 8${parity === 'none' ? 'N' : parity === 'even' ? 'E' : 'O'}1。`,
+      '发送器为每个字节加入起始位 0、8 位数据（LSB 优先）、可选校验位及停止位 1。',
+      `发送 ${baud} baud，每位 ${bitUs.toFixed(3)} μs；接收 ${receiverBaud} baud。`,
+      '接收端从每字节起始下降沿计时，半个位检查起始位，随后每个位中心采样。',
+      outcome.detail
+    ];
+    return { protocol: 'UART', data, baud, receiverBaud, parity, delayNs, bits, intendedBits: bits.map(b => ({ ...b })), fields: fieldSegments(bits),
+      timing: { bitrate: baud, bitNs: bitUs * 1000, bitUs, samplePercent: 50, sampleNs: bitUs * 500 }, samples, frames, rxData, outcome,
+      durationUs: bits.length * bitUs + delayUs, logs, limits: [
+        'UART 使用理想单端逻辑电平示意；不代表 RS-232 或 RS-485 的电气电压。',
+        '每个发送字节的起始沿都能被理想接收器重新捕获；严重失配时真实 UART 还可能漏掉起始沿，本模型不模拟该状态机。',
+        '采用理想中心单点采样；未模拟过采样、多数表决、抖动或噪声。固定传播延迟整体平移接收时间，不直接产生时钟失配。',
+        'UART 本身没有 CRC、仲裁和 ACK；应用层需要自行定义消息边界与可靠性机制。'
+      ] };
+  }
+  return { parseData, timing, suggestTiming, buildCan, buildUart, arbitrate, crc15, stuffBits, decodeCan };
+});
+</script><script>/* Offline teaching UI. All strings from form inputs are rendered as text. */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id), P = window.ProtocolLab;
+const state = {protocol:'CAN', result:null, cursor:0, stage:0, timer:null, config:null, arbitration:null, dirty:false};
+const fieldNames = {SOF:'帧起始',ID:'标识符',RTR:'数据帧标志',IDE:'标准帧标志',r0:'保留位',DLC:'数据长度',DATA:'数据',CRC:'CRC 校验','CRC delimiter':'CRC 界定符',ACK:'接收确认','ACK delimiter':'ACK 界定符',EOF:'帧结束',IFS:'帧间隔',START:'起始位',PARITY:'校验位',STOP:'停止位'};
+const stages = [['应用数据','选择要发送的字节'],['协议组帧','字段、校验与编码'],['线上传输','电平与逐位采样'],['接收检查','还原、校验、过滤'],['应用读取','字节与数值解释']];
+const colors = {green:'#087c69',blue:'#3171b4',orange:'#b66b1c',red:'#b63e47',muted:'#61716f',grid:'#e6ece8',ink:'#182e2b'};
+const ns = 'http://www.w3.org/2000/svg';
+const fmt = (n,d=3) => Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+const hex = n => Number(n).toString(16).toUpperCase().padStart(2,'0');
+const hx = n => '0x'+Number(n).toString(16).toUpperCase();
+function el(tag,text,cls) {const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+function svg(tag,attrs,text) {const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!==undefined)e.textContent=text;return e;}
+function line(root,x1,y1,x2,y2,color=colors.grid,width=1,dash='') {root.append(svg('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width,'stroke-dasharray':dash}));}
+function label(root,x,y,text,fill=colors.muted,size=10,anchor='start') {root.append(svg('text',{x,y,fill,'font-size':size,'font-family':'Segoe UI, Microsoft YaHei, sans-serif','text-anchor':anchor},text));}
+function stop() {clearInterval(state.timer);state.timer=null;$('play').textContent='▶ 播放';}
+function showError(error) {$('validation').hidden=false;$('validation').textContent=error.message||String(error);}
+function number(id) {const v=Number($(id).value);if(!$(id).value.trim()||!Number.isFinite(v))throw new Error('请输入有效数字：'+id);return v;}
+function idValue(id,nullable=false) {let v=$(id).value.trim().replace(/^0x/i,'');if(!v&&nullable)return null;if(!/^[0-9a-f]{1,3}$/i.test(v)||parseInt(v,16)>0x7ff)throw new Error('标准帧 ID 必须是 000–7FF 的十六进制数。');return parseInt(v,16);}
+function getTiming() {return {clockMHz:number('clock'),brp:number('brp'),tseg1:number('seg1'),tseg2:number('seg2')};}
+function applyTiming() {try {const t=P.suggestTiming(number('clock'),number('target'),number('sample-target'));$('brp').value=t.brp;$('seg1').value=t.tseg1;$('seg2').value=t.tseg2;previewTiming();markDirty();}catch(e){showError(e);}}
+function previewTiming() {try {const c=getTiming(),t=P.timing(c);$('timing-formula').textContent=`${fmt(c.clockMHz)} MHz ÷ ${c.brp} ÷ ${t.totalTq} TQ = ${fmt(t.bitrate/1000)} kbit/s\n1 TQ = ${fmt(t.tqNs)} ns · 采样点 ${fmt(t.samplePercent)}%`;$('timing-formula').style.whiteSpace='pre-line';}catch(e){$('timing-formula').textContent=e.message;}}
+function markDirty(){stop();state.dirty=true;$('dirty').textContent='配置已更改，请点击“生成实验”应用。';$('dirty').classList.add('bad');}
+function build() {
+ stop();try {
+  const data=P.parseData($('payload').value,state.protocol==='CAN'?8:32);let c;
+  state.arbitration=null;
+  if(state.protocol==='CAN') {
+   c={...getTiming(),id:idValue('can-id'),data,receiver:$('receiver').value,filterId:idValue('filter-id',true),fault:$('fault').value,delayNs:number('delay')};
+   if($('preset').value==='arbitration') {state.arbitration=P.arbitrate(c.id,idValue('other-id'));if(state.arbitration.winner==='B')c.id=idValue('other-id');}
+   state.result=P.buildCan(c);
+  } else {c={data,baud:number('baud'),receiverBaud:number('rx-baud'),parity:$('parity').value};state.result=P.buildUart(c);}
+  state.config=c;state.cursor=0;state.stage=0;state.dirty=false;$('dirty').classList.remove('bad');$('dirty').textContent='配置已应用。点击播放或选择任意一位。';$('validation').hidden=true;
+  renderAll();
+ } catch(e){state.dirty=true;$('dirty').textContent='配置尚未应用；右侧保留上次有效实验。';$('dirty').classList.add('bad');showError(e);}
+}
+function renderAll(){renderPipeline();renderFrame();renderMetrics();renderResult();renderArbitration();renderCursor();}
+function renderPipeline(){
+ const root=$('pipeline');root.replaceChildren();stages.forEach(([title,sub],i)=>{const b=el('button');b.classList.toggle('active',state.stage===i);b.setAttribute('aria-pressed',state.stage===i);b.append(el('span','0'+(i+1),'step-number'),el('b',title),el('small',sub));b.onclick=()=>{state.stage=i;renderPipeline();};root.append(b);});
+ const r=state.result,can=state.protocol==='CAN',data=r.data.map(hex).join(' ')||'（空数据）';
+ const detail=can?[
+  `应用提交 ID ${hx(r.id)}、${r.data.length} 字节：${data}。ID 描述消息类型与优先级，字节含义由上层约定。`,
+  `控制器按字段组帧，计算 CRC-15 = ${hx(r.crc)}，从 SOF 到 CRC 末尾进行位填充。本实验插入 ${r.stuffCount} 个填充位。数据字节高位先发。`,
+  `收发器将 0 变成显性差分电压、1 变成隐性。控制器每个位在 ${fmt(r.timing.samplePercent)}% 处采样。下方播放速度已放慢，时间标签仍是真实协议时间。`,
+  `接收端去填充并检查帧与 CRC。正常接收节点确认有效帧，与接收过滤器是否匹配无关。ACK 表示至少一个节点正确接收。`,
+  `通过过滤后，数据才交给应用。本例把前两个字节按小端无符号数解释；CAN 本身并不规定这些数据必须代表转速。`
+ ]:[
+  `应用提交 ${r.data.length} 字节：${data}。每个字节分别装入一个 UART 帧。`,
+  `每个字节添加起始位 0、8 个数据位${r.parity==='none'?'':'、一个校验位'}及停止位 1。UART 数据低位先发。`,
+  `发送端按 ${fmt(r.baud)} baud 输出 0 / 3.3 V。接收端检测起始下降沿，并用自己的 ${fmt(r.receiverBaud)} baud 时钟，在各位中心附近采样。`,
+  `每个字节重新起始同步。发送与接收波特率相差过大，会导致采样位置漂移，出现数据、校验或停止位错误。`,
+  `UART 没有 CAN 那样的 ACK。无校验格式下，数据位变化可能不被硬件发现；应用协议可以另加校验与响应。`
+ ];$('stage-detail').textContent=detail[state.stage];
+}
+function renderMetrics(){const r=state.result,t=r.timing,can=state.protocol==='CAN';$('metric-rate').textContent=fmt((can?t.bitrate:r.baud)/1000)+' k'+(can?'bit/s':'baud');$('metric-bit').textContent=fmt(t.bitUs)+' μs';$('sample-caption').textContent=can?'采样点':'接收位时间';$('metric-sample').textContent=can?fmt(t.samplePercent)+'%':fmt(1e6/r.receiverBaud)+' μs';$('metric-length').textContent=r.bits.length+' bit';$('frame-meta').textContent=can?`${r.stuffCount} 个填充位 · 含 3 bit 帧间隔`:`${r.data.length} 个字节帧 · LSB 优先`;$('cursor').max=r.bits.length-1;
+ $('scope-description').textContent=can?'差分电压 → 收发器 RX → 控制器采样':'TX 逻辑电压 → RX 起始同步 → 中心采样';
+ $('model-note').textContent=can?'波形为发送端典型理想电压，不包含反射、噪声或共模变化。下方放大图单独表示同步后的相对边沿迟到；此条件只做采样裕量演示，不替代往返延迟与线长计算。错误实验保留名义后续位，未展开真实错误帧与重发。':'波形为 3.3 V 逻辑电平示意。接收采样以每字节收到的起始沿对齐；固定传播延迟只平移整帧。假定每个字节起始沿都能重新捕获；严重失配时真实接收器可能漏掉起始沿。未模拟过采样或多数表决。';
+ const legend=$('wave-legend');legend.replaceChildren();const entries=can?[['CAN_H',colors.green],['CAN_L',colors.blue],['RX 逻辑（0 / 1）',colors.ink],['● 采样位置',colors.orange]]:[['TX（0 / 3.3 V）',colors.green],['● 接收端采样位置',colors.orange]];entries.forEach(([s,c])=>{const span=el('span');const i=el('i');i.style.background=c;span.append(i,document.createTextNode(s));legend.append(span);});
+}
+function renderFrame(){const root=$('frame-map');root.replaceChildren();state.result.fields.forEach(f=>{const b=el('button',f.name);b.style.flexGrow=Math.max(1,f.length);b.dataset.field=f.name;b.title=`${fieldNames[f.name]||f.name}：${f.length} 个线上位`;b.onclick=()=>{stop();selectBit(f.start);};b.dataset.start=f.start;b.dataset.end=f.end;root.append(b);});}
+function selectBit(i){state.cursor=Math.min(state.result.bits.length-1,Math.max(0,i));renderCursor();}
+function windowRange(){const count=Math.max(8,Math.min(24,Math.floor(($('wave').clientWidth-65)/25)));const start=Math.max(0,Math.min(state.result.bits.length-count,state.cursor-Math.floor(count/3)));return {start,end:Math.min(state.result.bits.length,start+count)};}
+function renderCursor(){const r=state.result,b=r.bits[state.cursor];$('cursor').value=state.cursor;$('bit-position').textContent=`位 ${state.cursor+1} / ${r.bits.length}`;$('current-time').textContent=fmt(state.cursor*r.timing.bitUs)+' μs';$('previous').disabled=state.cursor===0;$('next').disabled=state.cursor===r.bits.length-1;
+ document.querySelectorAll('#frame-map button').forEach(e=>e.classList.toggle('active',state.cursor>=+e.dataset.start&&state.cursor<+e.dataset.end));
+ const changed=r.faultIndex===state.cursor;
+ $('selected-bit').textContent=`第 ${state.cursor+1} 个线上位 · ${fieldNames[b.field]||b.field} (${b.field}) · 值 ${b.value}${b.stuffed?' · 填充位：接收时删除，不属于原始数据':''}${changed?' · 故障注入：这一位被翻转':''}${state.protocol==='CAN'?' · '+(b.value===0?'显性，典型差分电压 2 V':'隐性，典型差分电压 0 V'):''}`;
+ const strip=$('bit-strip');strip.replaceChildren();const {start,end}=windowRange();for(let i=start;i<end;i++){const bit=r.bits[i],bt=el('button',String(bit.value));bt.classList.toggle('stuffed',bit.stuffed);bt.classList.toggle('selected',i===state.cursor);bt.setAttribute('aria-label',`第${i+1}位 ${bit.field} ${bit.value}${bit.stuffed?' 填充位':''}`);bt.setAttribute('aria-pressed',i===state.cursor);bt.onclick=()=>{stop();selectBit(i);};strip.append(bt);}
+ drawWave(start,end);drawZoom();
+}
+function drawWave(start,end){const root=$('wave'),r=state.result,can=state.protocol==='CAN';root.replaceChildren();const w=root.clientWidth||800,h=220,left=53,right=8,dx=(w-left-right)/(end-start);root.setAttribute('viewBox',`0 0 ${w} ${h}`);const x=i=>left+(i-start)*dx;const currentX=x(state.cursor);root.append(svg('rect',{x:currentX,y:7,width:dx,height:184,fill:'#e5f4ed'}));
+ const levels=can?[[3.5,32],[2.5,62],[1.5,92]]:[[3.3,38],[0,116]];levels.forEach(([v,y])=>{line(root,left,y,w-right,y);label(root,0,y+4,v+' V');});
+ for(let i=start;i<=end;i++){line(root,x(i),10,x(i),190,colors.grid,1);if((i-start)%Math.ceil((end-start)/7)===0)label(root,x(i),210,fmt(i*r.timing.bitUs,1),colors.muted,9,'middle');}
+ label(root,w-right,219,'时间 / μs',colors.muted,9,'end');
+ const trace=(yFn,color,stroke=2)=>{let d=start===0?`M${left-10} ${yFn(1)} L${left} ${yFn(1)} `:'';for(let i=start;i<end;i++){const y=yFn(r.bits[i].value);d+=(i===start&&start!==0?'M':'L')+x(i)+' '+y+' L'+x(i+1)+' '+y;}root.append(svg('path',{d,fill:'none',stroke:color,'stroke-width':stroke,'stroke-linejoin':'round'}));};
+ if(can){trace(v=>v?62:32,colors.green);trace(v=>v?62:92,colors.blue);trace(v=>v?143:172,colors.ink,1.6);label(root,0,147,'RX 1');label(root,0,176,'RX 0');for(let i=start;i<end;i++){const sx=x(i)+dx*r.timing.samplePercent/100,late=state.config.delayNs>=r.timing.sampleNs;root.append(svg('circle',{cx:sx,cy:r.bits[i].value?143:172,r:2.7,fill:late?colors.red:colors.orange}));}}
+ else{trace(v=>v?38:116,colors.green);label(root,0,160,'采样');(r.samples||[]).forEach(s=>{const bit=s.timeUs/r.timing.bitUs;if(bit>=start&&bit<end){const xx=x(bit);line(root,xx,130,xx,154,s.ok?colors.orange:colors.red,1);root.append(svg('circle',{cx:xx,cy:s.actual?38:116,r:3,fill:s.ok?colors.orange:colors.red}));label(root,xx,169,String(s.actual),s.ok?colors.orange:colors.red,10,'middle');}});}
+ root.onclick=e=>{const rect=root.getBoundingClientRect(),at=(e.clientX-rect.left)/rect.width*w;stop();selectBit(Math.floor((at-left)/dx)+start);};
+}
+function drawZoom(){const root=$('bit-zoom'),r=state.result,can=state.protocol==='CAN';root.replaceChildren();const w=root.clientWidth||800,left=9,right=w-9,span=right-left;root.setAttribute('viewBox',`0 0 ${w} 104`);
+ if(can){const t=r.timing,n=t.totalTq,sp=t.samplePercent/100;const parts=[[0,1,'同步','#dce8e0'],[1,1+t.tseg1,'TSEG1','#d9eee5'],[1+t.tseg1,n,'TSEG2','#e7edf4']];parts.forEach(([a,b,name,fill])=>{root.append(svg('rect',{x:left+a/n*span,y:34,width:(b-a)/n*span,height:25,fill}));if((b-a)/n*span>45)label(root,left+(a+b)/2/n*span,51,name,colors.ink,10,'middle');});if(n<=80)for(let i=0;i<=n;i++)line(root,left+i/n*span,34,left+i/n*span,59,'#ffffff',1);
+ const sx=left+sp*span;line(root,sx,24,sx,68,colors.orange,2);label(root,sx,17,'采样 '+fmt(t.sampleNs/1000)+' μs',colors.orange,11,'middle');label(root,left,81,'0 μs');label(root,right,81,fmt(t.bitUs)+' μs',colors.muted,10,'end');
+ const delay=state.config.delayNs,dx=left+Math.min(1,delay/t.bitNs)*span;line(root,dx,30,dx,63,delay>=t.sampleNs?colors.red:colors.blue,1.5,'3 3');label(root,left,100,`相对迟到 ${fmt(delay)} ns · ${delay<t.sampleNs?'采样前余量 '+fmt(t.sampleNs-delay)+' ns':'已超过采样点（简化失效条件）'}`,delay<t.sampleNs?colors.muted:colors.red,10);
+ $('zoom-caption').textContent=`1 TQ = ${fmt(t.tqNs)} ns · 共 ${n} TQ`;
+ }else{const frameBits=r.parity==='none'?10:11;const chosen=r.samples.filter(s=>s.byteIndex===Math.floor(state.cursor/frameBits));const byteIndex=Math.floor(state.cursor/frameBits),base=byteIndex*frameBits*r.timing.bitUs;for(let i=0;i<frameBits;i++){root.append(svg('rect',{x:left+i/frameBits*span,y:30,width:span/frameBits-2,height:27,fill:i===0?'#d9eee5':i===frameBits-1?'#e7edf4':'#f0f4f1'}));label(root,left+(i+.5)/frameBits*span,48,i===0?'起始':i===frameBits-1?'停止':i<=8?'D'+(i-1):'校验',colors.ink,9,'middle');}chosen.forEach(s=>{const frac=(s.timeUs-base)/(frameBits*r.timing.bitUs);if(frac>=0&&frac<=1){const x=left+frac*span;line(root,x,61,x,73,s.ok?colors.orange:colors.red,2);}});label(root,left,96,'橙色短线：接收采样位置；红色：与发送期望不一致',colors.muted,10);$('zoom-caption').textContent='当前字节：起始位 → 数据低位先发 → 停止位';}
+ $('zoom-title').textContent=can?'把当前这一位放大':'把当前字节帧放大';
+}
+function renderResult(){const r=state.result,o=r.outcome,root=$('result');root.replaceChildren();$('result-badge').textContent=o.code;$('result-badge').className='badge '+(o.ok?'good':'bad');root.append(el('div',o.title,'result-title '+(o.ok?'good':'bad')),el('p',o.detail,'result-detail'));
+ const rx=r.rxData||[];if(rx.length){const bytes=el('div',undefined,'rx-bytes');rx.forEach(v=>bytes.append(el('span',hex(v))));root.append(bytes);if(rx.length>=2)root.append(el('p',`前两字节，小端 uint16：${rx[0]+rx[1]*256}；大端 uint16：${rx[0]*256+rx[1]}。`,'decode'));}else root.append(el('p',r.data.length===0&&o.ok?'零字节数据帧：没有数据负载。':'应用未获得数据字节。','decode'));
+ if(state.protocol==='CAN')root.append(el('p',`总线 ACK：${r.ack?'显性 0':'隐性 1'} · 发送 CRC：${hx(r.crc)}${r.crcReceived!=null?' · 帧内 CRC：'+hx(r.crcReceived):''}${r.crcCalculated!=null?' · 接收重算：'+hx(r.crcCalculated):''}`,'decode'));
+ root.append(el('p','显示完整实验的最终预测结果；播放用于回看逐位过程。','hint'));
+ const log=$('log');log.replaceChildren();if(state.arbitration)log.append(el('li',state.arbitration.detail));r.logs.forEach(t=>log.append(el('li',t)));
+}
+function renderArbitration(){const a=state.arbitration;$('arbitration-panel').hidden=!a;if(!a)return;const root=$('arbitration');root.replaceChildren();const grid=el('div',undefined,'arb-grid');[['A','节点 A '+hx(a.idA),'a'],['B','节点 B '+hx(a.idB),'b'],['bus','总线','bus']].forEach(([who,name,key])=>{const row=el('div',undefined,'arb-row');row.append(el('b',name));a.steps.forEach((s,i)=>{const cell=el('span',String(s[key]),'arb-cell');cell.classList.toggle('loss',i===a.lossIndex);if(who!=='bus'&&a.loser===who&&i>a.lossIndex)cell.classList.add('inactive');row.append(cell);});grid.append(row);});root.append(grid,el('p',a.detail,'arb-caption'),el('p','仲裁比较 ID 的 11 位，从高位到低位。退出节点后续不再驱动；表中的浅色值是原计划位。上方波形展示获胜节点的完整帧；两节点使用相同负载。','hint'));}
+function preset(){stop();const val=$('preset').value;if(state.protocol==='CAN'){$('receiver').value='normal';$('fault').value='none';$('filter-id').value='';$('delay').value=200;$('payload').value='DC 05';$('can-id').value='200';$('other-id').value='300';$('other-id').disabled=val!=='arbitration';if(val==='stuff')$('payload').value='00 00 00 00 00 00 00 00';if(val==='noack')$('receiver').value='missing';if(val==='filter')$('filter-id').value='123';if(val==='flip')$('fault').value='bitflip';if(val==='delay')$('delay').value=1900;if(val==='arbitration'){$('can-id').value='130';$('other-id').value='120';}}else{$('payload').value='55 A3';$('baud').value=115200;$('rx-baud').value=val==='drift'?85000:115200;$('parity').value=val==='parity'?'even':'none';}build();}
+function switchProtocol(protocol){stop();state.protocol=protocol;const can=protocol==='CAN';$('tab-can').classList.toggle('active',can);$('tab-uart').classList.toggle('active',!can);$('tab-can').setAttribute('aria-pressed',can);$('tab-uart').setAttribute('aria-pressed',!can);$('can-fields').hidden=!can;$('can-timing').hidden=!can;$('uart-fields').hidden=can;$('format-label').textContent=can?'经典 CAN · 标准帧':'UART · 异步串行';$('payload-hint').textContent=can?'0–8 字节；DC 05 按小端无符号数解释为 1500。':'1–32 字节；观察 UART 低位先发与 CAN 高位先发的区别。';const options=can?[['normal','01 / 正常收发'],['stuff','02 / 连续 0 与位填充'],['noack','03 / 没有接收节点'],['filter','04 / ACK 成功，但过滤掉'],['flip','05 / 数据位受干扰'],['delay','06 / 信号晚于采样点'],['arbitration','07 / 两个节点同时发送']]:[['normal','01 / 正常收发'],['drift','02 / 接收波特率不匹配'],['parity','03 / 偶校验帧']];$('preset').replaceChildren();options.forEach(([v,t])=>{const o=el('option',t);o.value=v;$('preset').append(o);});preset();}
+$('tab-can').onclick=()=>switchProtocol('CAN');$('tab-uart').onclick=()=>switchProtocol('UART');$('preset').onchange=preset;$('build').onclick=build;$('calculate').onclick=applyTiming;
+document.querySelectorAll('.settings input,.settings select,.settings textarea').forEach(e=>{if(e.id!=='preset')e.addEventListener('input',()=>{markDirty();if(['clock','brp','seg1','seg2'].includes(e.id))previewTiming();});});
+$('cursor').oninput=()=>{stop();selectBit(Number($('cursor').value));};$('next').onclick=()=>{stop();selectBit(state.cursor+1);};$('previous').onclick=()=>{stop();selectBit(state.cursor-1);};$('restart').onclick=()=>{stop();selectBit(0);state.stage=0;renderPipeline();};
+function play(){if(state.timer){stop();return;}if(state.dirty){build();if(state.dirty)return;}if(state.cursor>=state.result.bits.length-1)selectBit(0);state.stage=2;renderPipeline();$('play').textContent='Ⅱ 暂停';state.timer=setInterval(()=>{if(state.cursor>=state.result.bits.length-1){stop();state.stage=4;renderPipeline();return;}selectBit(state.cursor+1);},Number($('speed').value));}
+$('play').onclick=play;$('speed').onchange=()=>{if(state.timer){stop();play();}};
+$('export').onclick=()=>{if(!state.result)return;const blob=new Blob([JSON.stringify({version:1,description:'通信实验室教学模型，非实测',protocol:state.protocol,config:state.config,result:state.result,arbitration:state.arbitration},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='protocol-lab-'+state.protocol.toLowerCase()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+new ResizeObserver(()=>{if(state.result)renderCursor();}).observe($('wave'));
+previewTiming();build();
+})();
+</script>
+</body></html>
