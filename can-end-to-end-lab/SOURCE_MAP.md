@@ -126,6 +126,12 @@ TX payload 为：`identifier:u32`、`channel:u8`、`ctrl_grp:u8`、`fd_props:u8`
 
 一致性 DMA 内存仍需正确的内存屏障来保证数据与发布标志的顺序；CPU 虚拟地址与供设备使用的 DMA 地址也不应混为一谈。[Linux DMA API 指南](https://docs.kernel.org/core-api/dma-api-howto.html)
 
+## 新增 CAN 家族字段实验的边界
+
+`can-formats.js` 与 `can-family-app.js` 新增标准/扩展/远程、ISO FD（BRS 开/关）和 XL 的参数、格式及字段回放。它们是独立通用模型，**不复用本文私有 DMA 布局来声称板卡支持这些新格式**。实际驱动源码与这里列出的快照没有因 GUI 扩展而改动。
+
+经典四种组合计算 CRC-15 和动态填充；FD / XL 只展示字段及正常流程，不计算 CRC 数值或完整线上编码。详细范围与官方格式来源见 [CAN_FORMATS.md](CAN_FORMATS.md)。
+
 ## 源码快照 SHA-256
 
 ```text

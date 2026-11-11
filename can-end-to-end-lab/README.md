@@ -6,6 +6,26 @@
 
 ## 从哪个实验开始
 
+### 新增：位时序放大镜
+
+CAN 页面的帧类型说明下方可以展开“一位里面：时钟 → TQ → SEG1 → 采样 → SEG2”。这是独立的理想单采样实验，不改变帧生成器或板卡详细实验的参数。
+
+1. 默认 160 MHz、实际分频 16、TSEG1=15、TSEG2=4：每位 20 TQ / 2 μs，经过 16 TQ / 1.6 μs 后采样。
+2. 点击“走 1 个时钟”，看 16 个原始周期才组成一个 TQ；点击“到下个 TQ 边界”可按格前进。
+3. 点击“到下个采样点”，观察 SEG1 结束和 SEG2 开始是同一个瞬间；接收结果仅在此时出现。
+4. 继续走过 SEG2，仍是同一个数据位、不会再次采样；到下一位后，重新经历同步段、SEG1、采样、SEG2。
+5. 选择“16 TQ / 位”，对比 80% 需要 12.8 TQ，而整数配置 13/16 实际为 81.25%。修改参数会立即重算并复位。
+
+可用 00 / 01 / 10 / 11 对比：即使连续两位电平不变，每个位仍有自己的采样位置，TQ 网格本身不是电平跳变。FD 数据时序预设为 2 Mbit/s，用于对比另一套位时序，未模拟 BRS 位内切换。真实传播延迟、重同步、SJW、FD 延迟补偿和反射不在本放大镜范围内。
+
+位时序依据：[AMD CAN 位时序逻辑](https://docs.amd.com/r/en-US/pg096-can/Bit-Timing-Logic)、[Microchip 位时序说明](https://ww1.microchip.com/downloads/en/Appnotes/00754.pdf)。
+
+### 协议与帧实验
+
+CAN 页面新增 **九种帧格式**：经典标准/扩展的数据帧与远程帧，FD 标准/扩展各含 BRS 开关，以及 CAN XL。可修改参数、点击字段、逐步播放到 ACK / TxDone、导出字段记录。SOF、ID、DATA、CRC 等均标明 bit 和字节换算，填充位另算。
+
+经典 CAN 四种组合计算 CRC-15 与动态填充；FD / XL 当前为字段级教学回放，**未生成 CRC 数值和完整线上编码**。标准经典 CAN 的原板卡详细实验保留在下方；新增格式不代表实际板卡已经支持。具体字段表、DLC 映射和实现范围见 [CAN_FORMATS.md](CAN_FORMATS.md)。
+
 | 协议 | 先观察什么 | 可以改变什么 |
 |---|---|---|
 | SPI | CS 选择对端；SCLK 每个有效边沿让双方同时采一位；MOSI/MISO 各自拼成字节 | 四种时钟模式、最高/最低位先发、时钟频率、未选中对端 |
@@ -54,7 +74,7 @@
 
 当前驱动使用 `tosun_pcie_protocol.c`，通过 delayed work 默认每1 ms轮询 S2MM；不是 IRQ/MSI/NAPI 完成路径。收到成功 TX report 后调用 `can_get_echo_skb`，按同通道 FIFO 完成待发送项。源码位置、快照哈希、包布局和 BAR 表见 [SOURCE_MAP.md](SOURCE_MAP.md)。
 
-CAN 部分只支持经典 CAN 的11位标准数据帧。CAN FD、CAN XL、扩展帧、远程帧、多个同时在途请求与真实板卡控制不在此项目范围内。
+板卡详细实验（`flow.js` / `app.js`）仍限定经典 CAN 的 11 位标准数据帧。新增 CAN 家族实验（`can-formats.js` / `can-family-app.js`）覆盖九种格式，支持扩展与远程帧的 CRC-15 / 填充，并提供 FD / XL 字段级回放；其实现范围见上文和 CAN_FORMATS.md。多个同时在途请求与真实板卡控制不在此项目范围内。
 
 **驱动运行在 Linux 内核内；CAN ACK 在帧内产生，早于对端应用处理；TxDone 是设备上报触发的主机处理，不是对端回复帧。** 对端应用交付和本机完成上报是两个独立分支，本动画顺序是可阅读的一种编排，不保证真实系统的两边调度先后。默认 SocketCAN 本地回环可供独立监听 socket（如 candump）读取；发送 socket 读自己的帧取决于 CAN_RAW_RECV_OWN_MSGS 等配置。
 
@@ -68,6 +88,11 @@ CAN 部分只支持经典 CAN 的11位标准数据帧。CAN FD、CAN XL、扩展
 - `spi.js` / `i2c.js` / `uart.js`：三种新增协议的时序与逐步解码模型。
 - `serial-app.js` / `serial.css`：协议切换、通用五步流程、多线波形与解码视图。
 - `build.cjs`：把资源内嵌为单文件离线 GUI。
+- `can-formats.js`：九种 CAN 帧组合、字段模型、经典 CRC / 填充、参数约束与通用流程。
+- `can-family-app.js` / `can-family.css`：帧格式图、字段表、参数、逐字段回放与导出。
+- `can-formats.test.cjs` / `can-family-ui.test.cjs`：格式边界和新增界面回归。
+- `bit-timing.js` / `bit-timing-app.js` / `bit-timing.css`：原始时钟、TQ、两位分段与唯一采样边界的交互演示。
+- `bit-timing.test.cjs` / `bit-timing-ui.test.cjs`：采样前后状态、整数 TQ 限制与位时序界面检查。
 - `wire.test.cjs` / `flow.test.cjs`：协议与流程计算检查。
 - `ui.test.cjs`：浏览器操作、状态、导出与窄屏布局检查。
 - `spi.test.cjs` / `i2c.test.cjs` / `uart.test.cjs`：独立协议语义与时序检查。
@@ -76,8 +101,10 @@ CAN 部分只支持经典 CAN 的11位标准数据帧。CAN FD、CAN XL、扩展
 Node.js 下执行：
 
 ```text
-node --test wire.test.cjs flow.test.cjs spi.test.cjs i2c.test.cjs uart.test.cjs
+node --test wire.test.cjs flow.test.cjs spi.test.cjs i2c.test.cjs uart.test.cjs can-formats.test.cjs bit-timing.test.cjs
 node build.cjs
+node bit-timing-ui.test.cjs
+node can-family-ui.test.cjs
 node ui.test.cjs
 node serial-ui.test.cjs
 ```
